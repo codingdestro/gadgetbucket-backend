@@ -1,9 +1,16 @@
 import express, { Request, Response } from "express";
+import { Connection } from "mysql";
 import bodyParser from "body-parser";
+import { config } from "dotenv";
+config();
 
-const PORT = 5555;
+import { init } from "./db";
+
+const PORT = Number(process.env.PORT || 5555);
 
 const app = express();
+
+export const db: Connection = init();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
