@@ -7,25 +7,28 @@ type userType = {
   balance: number;
 };
 
-const createUser = async (user: userType) => {
+const createUser = async (user: userType): Promise<Users> => {
   try {
     const newUser = await Users.create(user);
+
     return newUser;
   } catch (error) {
-    return error;
+    throw new Error("failed to create or find user!");
   }
 };
 
-const getUser = async (userId: number) => {
+const getUser = async (contact: string) => {
   try {
     const user = await Users.findOne({
       where: {
-        id: userId,
+        contact: contact,
       },
     });
+
     return user;
   } catch (error) {
-    return error;
+    throw new Error(`failed to get user!`);
+    return null;
   }
 };
 
@@ -38,4 +41,4 @@ const deleteUser = async (userId: number) => {
   }
 };
 
-export { createUser, getUser, deleteUser };
+export { createUser, getUser, deleteUser, userType };
