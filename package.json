@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc . -p",
     "ts": "tsc-watch --onSuccess \" node src/index.js\"",
-    "dev": "bun run src/index.ts"
+    "dev": "bun run src/main.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
