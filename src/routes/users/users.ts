@@ -1,16 +1,19 @@
 import { Request, Response } from "express";
 import { isUserExists } from "../../service/userExists";
-import { createUser } from "../../controllers/users";
+import { createUser, userType } from "../../controllers/users";
+import { createToken } from "../../service/token";
 
 const users = {
   async signin(req: Request, res: Response) {
     try {
-      const user = req.body;
+      const user: userType = req.body;
       const exists = await isUserExists(user.contact);
       //if user was not created
       if (exists !== null) {
+        const token = createToken((exists?.toJSON()).id);
         res.json({
           msg: "user has already an account",
+          token,
         });
         return;
       }
@@ -19,10 +22,12 @@ const users = {
 
       res.json({
         msg: "new user created",
-        user,
+        token: createToken((newUser?.toJSON()).id),
       });
     } catch (error) {
-      console.log(error);
+      res.json({
+        msg: "user could't create or found",
+      });
     }
   },
   async login(req: Request, res: Response) {
@@ -46,9 +51,14 @@ const users = {
       }
       res.json({
         msg: "logged in",
-        user,
+        token: createToken(user.toJSON().id),
       });
-    } catch (error) {}
+    } catch (error) {
+      console.log("there is an error on login");
+      res.json({
+        err: "failed to login user",
+      });
+    }
   },
 };
 

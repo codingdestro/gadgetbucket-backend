@@ -8,18 +8,18 @@ type userType = {
   balance: number;
 };
 
-const createUser = async (user: userType): Promise<Users> => {
+const createUser = async (user: userType): Promise<Users | null> => {
   try {
     const newUser = await Users.create(user);
-
     return newUser;
   } catch (error) {
-    throw new Error("failed to create or find user!");
+    throw error;
   }
 };
 
 const getUser = async (contact: string) => {
   try {
+    if (!contact) return null;
     const user = await Users.findOne({
       where: {
         contact: contact,
@@ -28,7 +28,7 @@ const getUser = async (contact: string) => {
 
     return user;
   } catch (error) {
-    throw new Error(`failed to get user!`);
+    throw error;
     return null;
   }
 };
@@ -38,7 +38,7 @@ const deleteUser = async (userId: number) => {
     const res = await Users.destroy({ where: { id: userId } });
     return res;
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
