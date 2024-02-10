@@ -22,6 +22,10 @@ Users.init(
       type: DataTypes.STRING(10),
       allowNull: false,
     },
+    password: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
     address: {
       type: DataTypes.STRING(50),
       allowNull: false,

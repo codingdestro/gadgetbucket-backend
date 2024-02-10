@@ -3,6 +3,7 @@ type userType = {
   id?: number;
   name: string;
   contact: string;
+  password: string;
   address: string;
   balance: number;
 };
