@@ -7,20 +7,34 @@ import {
   getAllProducts,
   getProductsWithOffset,
 } from "../../controllers/products";
+import { addImage, deleteAllProductImages } from "../../controllers/images";
+import { ProgramUpdateLevel } from "typescript";
+
+interface ProductWithImages extends productType {
+  urls: string[];
+}
 
 const route = {
   async addProduct(req: Request, res: Response) {
     try {
-      const product: productType = req.body;
+      const product: ProductWithImages = req.body;
       if (!product) {
         res.json({ err: "product not found!" });
         return;
       }
-      const result = await createProduct(product);
+      //creating new Product
+      const result = (await createProduct(product))?.toJSON();
+      //adding images according to product id
+      if (result.id && product.urls) {
+        await addImage(result.id, product.urls);
+      }
+
       res.json({
         msg: "your product added",
       });
-    } catch {}
+    } catch (error) {
+      throw error;
+    }
   },
   async deleteProduct(req: Request, res: Response) {
     try {
@@ -30,11 +44,12 @@ const route = {
         return;
       }
       const result = await deleteProduct(productId);
+      await deleteAllProductImages(productId);
       res.json({
         msg: "product has been deleted!",
       });
-    } catch {
-      console.log("error here!");
+    } catch (error) {
+      throw error;
     }
   },
 
@@ -46,7 +61,7 @@ const route = {
         products,
       });
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 
@@ -65,7 +80,7 @@ const route = {
         product,
       });
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   },
 
@@ -87,7 +102,7 @@ const route = {
         products,
       });
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 };
