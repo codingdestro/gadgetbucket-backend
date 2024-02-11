@@ -1,5 +1,6 @@
 import { sequelize } from "../db";
 import { DataTypes, Model } from "sequelize";
+import Products from "./_products";
 
 class Carts extends Model {}
 
@@ -12,7 +13,7 @@ Carts.init(
       autoIncrement: true,
     },
     user_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
         model: "Users",
@@ -20,12 +21,17 @@ Carts.init(
       },
     },
     product_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
         model: "Products",
         key: "id",
       },
+    },
+    quantity: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 1,
     },
   },
   {
@@ -34,4 +40,5 @@ Carts.init(
   },
 );
 
+Carts.belongsTo(Products, { foreignKey: "product_id" });
 export default Carts;

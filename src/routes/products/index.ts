@@ -1,5 +1,5 @@
 import { ProgramUpdateLevel } from "typescript";
-import route from "./products.ts";
+import route from "./route.ts";
 import { Router } from "express";
 
 const productRouter = Router();
