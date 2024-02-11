@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
-import users from "./route.ts";
+import * as userRoutes from "../../controllers/users.ts";
 
 const route = Router();
 
-route.post("/signin", users.signin);
-route.post("/login", users.login);
+route.post("/signin", userRoutes.signin);
+route.post("/login", userRoutes.login);
 
 export default route;

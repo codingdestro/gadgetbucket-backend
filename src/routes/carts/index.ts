@@ -1,10 +1,10 @@
 import { Router } from "express";
-import cartsRoute from "./route";
+import * as cartsRoute from "../../controllers/carts";
 
 const route = Router();
 
-route.post("/add", cartsRoute.addToCart);
-route.post("/get", cartsRoute.getCart);
-route.delete("/remove", cartsRoute.removeCartItem);
+route.post("/add", cartsRoute.addProductToCart);
+route.post("/get", cartsRoute.fetchUserCart);
+route.delete("/remove", cartsRoute.removeProductFromCart);
 
 export default route;

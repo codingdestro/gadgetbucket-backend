@@ -1,12 +1,11 @@
-import { ProgramUpdateLevel } from "typescript";
-import route from "./route.ts";
 import { Router } from "express";
+import * as productRoutes from "../../controllers/products.ts";
 
 const productRouter = Router();
-productRouter.post("/add", route.addProduct);
-productRouter.get("/get", route.fetchAllProducts);
-productRouter.get("/get/product", route.fetchProduct);
-productRouter.get("/get/products", route.fetchProductWithOffset);
-productRouter.delete("/delete/product", route.deleteProduct);
+productRouter.post("/add", productRoutes.addProduct);
+productRouter.get("/get", productRoutes.fetchAllProducts);
+productRouter.get("/get/product", productRoutes.fetchProduct);
+productRouter.get("/get/products", productRoutes.fetchProductWithOffset);
+productRouter.delete("/delete/product", productRoutes.deleteProduct);
 
 export default productRouter;

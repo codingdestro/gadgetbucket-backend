@@ -1,5 +1,7 @@
-import Products from "../models/_products.ts";
-
+import { Request, Response } from "express";
+import Products from "../models/_products";
+import { addImage, deleteAllProductImages } from "./images";
+import { ProgramUpdateLevel } from "typescript";
 interface productType {
   name: string;
   price: number;
@@ -7,75 +9,116 @@ interface productType {
   category: string;
   sub_category: string;
 }
+interface ProductWithImages extends productType {
+  urls: string;
+}
 
-const createProduct = async (product: productType) => {
+export const addProduct = async (req: Request, res: Response) => {
   try {
-    const result = await Products.create({
-      name: product.name,
-      price: product.price,
-      quantity: product.quantity,
-      category: product.category,
-      sub_category: product.sub_category,
+    const product: ProductWithImages = req.body;
+    if (!product) {
+      res.json({ err: "product not found!" });
+      return;
+    }
+    //creating new Product
+    const addedProduct = (
+      await Products.create({
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+        category: product.category,
+        sub_category: product.sub_category,
+      })
+    ).toJSON();
+
+    //adding images according to product id
+    if (addedProduct.id && addedProduct.urls) {
+      await addImage(addedProduct.id, product.urls);
+    }
+
+    res.json({
+      msg: "your product added",
     });
-    return result;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
-const deleteProduct = async (id: number) => {
+export const deleteProduct = async (req: Request, res: Response) => {
   try {
+    const productId: number = req.body.productId;
+    if (!productId) {
+      res.json({ err: "product id not found!" });
+      return;
+    }
     const result = await Products.destroy({
       where: {
-        id: id,
+        id: productId,
       },
     });
-    return result;
+
+    await deleteAllProductImages(productId);
+    res.json({
+      msg: "product has been deleted!",
+    });
   } catch (error) {
-    return error;
+    throw error;
   }
 };
 
-const getAProduct = async (id: string) => {
+export const fetchAllProducts = async (req: Request, res: Response) => {
   try {
+    const products = await Products.findAll();
+    res.json({
+      msg: "fetched all products",
+      products,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchProduct = async (req: Request, res: Response) => {
+  try {
+    const productId: string = req.query?.productId?.toString() || "";
+    if (!productId) {
+      res.json({
+        msg: "productId not found!",
+      });
+      return;
+    }
     const product = await Products.findOne({
       where: {
-        id: id,
+        id: productId,
       },
     });
-
-    return product;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const getProductsWithOffset = async (offset: number, limit: number) => {
-  try {
-    const products = await Products.findAll({
-      offset: offset,
-      limit: limit,
+    res.json({
+      msg: "fetched a product",
+      product,
     });
-    return products;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 };
 
-const getAllProducts = async () => {
+export const fetchProductWithOffset = async (req: Request, res: Response) => {
   try {
-    const result = await Products.findAll();
-    return result;
+    const { offset, limit } = req.query;
+    if (!offset || !limit) {
+      res.json({
+        msg: "offset or limit not found!",
+      });
+      return;
+    }
+    const products = await Products.findAll({
+      offset: Number(offset),
+      limit: Number(limit),
+    });
+    res.json({
+      msg: "fetched products",
+      products,
+    });
   } catch (error) {
-    console.log(error);
+    throw error;
   }
-};
-
-export {
-  deleteProduct,
-  createProduct,
-  productType,
-  getAllProducts,
-  getProductsWithOffset,
-  getAProduct,
 };
