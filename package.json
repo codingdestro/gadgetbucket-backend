@@ -11,6 +11,7 @@
     "@types/express": "^4.17.21",
     "@types/mysql": "^2.15.25",
     "@types/sequelize": "^4.28.20",
+    "axios": "^1.6.7",
     "tsc-watch": "^6.0.4"
   },
   "peerDependencies": {

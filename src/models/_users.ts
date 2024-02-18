@@ -31,7 +31,7 @@ Users.init(
       allowNull: false,
     },
   },
-  { sequelize, modelName: "Users" },
+  { sequelize, modelName: "Users", timestamps: false },
 );
 
 export default Users;

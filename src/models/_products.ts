@@ -22,6 +22,7 @@ Products.init(
     quantity: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
+      defaultValue: 10,
     },
     category: {
       type: DataTypes.STRING(20),
@@ -32,7 +33,7 @@ Products.init(
       allowNull: false,
     },
   },
-  { sequelize, modelName: "Products" },
+  { sequelize, modelName: "Products", timestamps: false },
 );
 
 export default Products;
