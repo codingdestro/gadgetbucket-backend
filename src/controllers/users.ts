@@ -1,6 +1,6 @@
 import Users from "../models/_users";
 import { isUserExists } from "../service/userExists";
-import { createToken } from "../service/token";
+import { createToken, verifyToken } from "../service/token";
 import { Request, Response } from "express";
 type userType = {
   id?: number;
@@ -93,4 +93,14 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
-export { getUser, signin, login };
+const authenticate = async (req: Request, res: Response) => {
+  try {
+    const token = req.body.token;
+    const result = verifyToken(token);
+    res.json({ result });
+  } catch (error) {
+    res.json({ msg: "error to verify token" });
+  }
+};
+
+export { getUser, signin, login, authenticate };

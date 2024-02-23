@@ -8,7 +8,6 @@ import route from "./routes";
 const PORT = Number(process.env.PORT || 5555);
 
 const app = express();
-sequelize.sync({ force: true });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
