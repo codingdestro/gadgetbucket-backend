@@ -2,7 +2,9 @@ import Users from "../models/_users";
 import { isUserExists } from "../service/userExists";
 import { createToken, verifyToken } from "../service/token";
 import { Request, Response } from "express";
-type userType = {
+import validate from "../service/validateUser";
+import { connect } from "bun";
+export type userType = {
   id?: number;
   name: string;
   contact: string;
@@ -39,16 +41,6 @@ const deleteUser = async (userId: number) => {
 const signin = async (req: Request, res: Response) => {
   try {
     const user: userType = req.body;
-    const exists = await isUserExists(user.contact);
-    //if user was not created
-    if (exists !== null) {
-      const token = createToken((exists?.toJSON()).id);
-      res.json({
-        msg: "user has already an account",
-        token,
-      });
-      return;
-    }
 
     const newUser = await Users.create(user);
 
@@ -97,10 +89,10 @@ const authenticate = async (req: Request, res: Response) => {
   try {
     const token = req.body.token;
     const result = verifyToken(token);
-    res.json({ result });
+    console.log(result);
+    res.json({ token: result });
   } catch (error) {
-    res.json({ msg: "error to verify token" });
+    res.json({ err: false });
   }
 };
-
 export { getUser, signin, login, authenticate };
