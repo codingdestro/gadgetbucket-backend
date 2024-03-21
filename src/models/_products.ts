@@ -6,29 +6,31 @@ class Products extends Model {}
 Products.init(
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
     },
-    name: {
-      type: DataTypes.STRING(20),
+    img: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     price: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
     },
-    quantity: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    textPrice: {
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 10,
     },
     category: {
       type: DataTypes.STRING(20),
       allowNull: false,
     },
-    sub_category: {
+    subCategory: {
       type: DataTypes.STRING(20),
       allowNull: false,
     },

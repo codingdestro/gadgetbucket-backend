@@ -1,4 +1,3 @@
-import { BaseError, Error } from "sequelize";
 import { getUser } from "../controllers/users";
 import Users from "../models/_users";
 

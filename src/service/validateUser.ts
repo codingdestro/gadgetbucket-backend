@@ -1,9 +1,7 @@
 const validate = {
   Contact(contact: string): boolean {
-    if (contact.length == 10) {
-      const regex = /^\d+$/;
-      return regex.test(contact);
-    } else return false;
+    const regex = /^\d+$/;
+    return contact.length == 10 ? regex.test(contact) : false;
   },
 
   Email(email: string): boolean {

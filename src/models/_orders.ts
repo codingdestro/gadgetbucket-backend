@@ -6,22 +6,21 @@ class Orders extends Model {}
 Orders.init(
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
+      type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true,
+      defaultValue: DataTypes.UUIDV4,
     },
     status: {
       type: DataTypes.ENUM,
-      values: ["ordered", "pending", "cancled", "delivered"],
+      values: ["ordered", "pending", "cancelled", "delivered"],
       defaultValue: "pending",
     },
-    price: {
-      type: DataTypes.FLOAT,
+    userId: {
+      type: DataTypes.UUID,
       allowNull: false,
     },
-    quantity: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    payment: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     address: {

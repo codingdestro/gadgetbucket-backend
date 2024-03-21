@@ -2,51 +2,37 @@ import Users from "../models/_users";
 import { isUserExists } from "../service/userExists";
 import { createToken, verifyToken } from "../service/token";
 import { Request, Response } from "express";
-import validate from "../service/validateUser";
-import { connect } from "bun";
-export type userType = {
-  id?: number;
-  name: string;
-  contact: string;
-  password: string;
-  address: string;
-  balance: number;
+import { UserType } from "../utils/types";
+
+const getUser = async (email: string) => {
+  if (!email) return null;
+  const user = await Users.findOne({
+    where: {
+      email,
+    },
+  });
+
+  return user;
 };
 
-const getUser = async (contact: string) => {
-  try {
-    if (!contact) return null;
-    const user = await Users.findOne({
-      where: {
-        contact: contact,
-      },
-    });
-
-    return user;
-  } catch (error) {
-    throw error;
-    return null;
-  }
-};
-
-const deleteUser = async (userId: number) => {
-  try {
-    const res = await Users.destroy({ where: { id: userId } });
-    return res;
-  } catch (error) {
-    throw error;
-  }
+export const deleteUser = async (userId: string) => {
+  const res = await Users.destroy({ where: { id: userId } });
+  return res;
 };
 
 const signin = async (req: Request, res: Response) => {
   try {
-    const user: userType = req.body;
+    const user: UserType = req.body;
 
-    const newUser = await Users.create(user);
+    const newUser = await Users.create({
+      name: user.name,
+      email: user.email,
+      password: user.password,
+    });
 
     res.json({
       msg: "new user created",
-      token: createToken((newUser?.toJSON()).id),
+      token: createToken(newUser.toJSON().id),
     });
   } catch (error) {
     res.json({
@@ -54,6 +40,7 @@ const signin = async (req: Request, res: Response) => {
     });
   }
 };
+
 const login = async (req: Request, res: Response) => {
   try {
     const { contact, password } = req.body;
@@ -90,7 +77,7 @@ const authenticate = async (req: Request, res: Response) => {
     const token = req.body.token;
     const result = verifyToken(token);
     console.log(result);
-    res.json({ token: result });
+    res.json({ token: token });
   } catch (error) {
     res.json({ err: false });
   }

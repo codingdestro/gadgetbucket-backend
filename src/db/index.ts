@@ -4,11 +4,11 @@ export const sequelize = new Sequelize({
   port: 3306,
   username: "root",
   password: "password",
-  database: "e_com",
+  database: "gadgetWeb",
   dialect: "mysql",
 });
 
-const initDB = () => {
+export const initDB = () => {
   sequelize
     .authenticate()
     .then(() => {

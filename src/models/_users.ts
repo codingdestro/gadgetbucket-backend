@@ -5,30 +5,27 @@ class Users extends Model {}
 Users.init(
   {
     id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
     },
+
     name: {
       type: DataTypes.STRING(20),
       allowNull: false,
     },
-    balance: {
-      type: DataTypes.DECIMAL,
-      defaultValue: 1000,
-      allowNull: false,
-    },
-    contact: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-    },
     password: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING,
       allowNull: false,
     },
-    address: {
+    email: {
       type: DataTypes.STRING(50),
       allowNull: false,
+    },
+
+    cartToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   { sequelize, modelName: "Users", timestamps: false },

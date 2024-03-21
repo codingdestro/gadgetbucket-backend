@@ -1,45 +1,25 @@
 import { sequelize } from "../db";
 import { DataTypes, Model } from "sequelize";
-import Products from "./_products";
-import Orders from "./_orders";
 
 class Carts extends Model {}
 
 Carts.init(
   {
     id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
-      autoIncrement: true,
     },
-    user_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    userId: {
+      type: DataTypes.UUID,
       allowNull: false,
-      references: {
-        model: "Users",
-        key: "id",
-      },
     },
-    product_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
+    productId: {
+      type: DataTypes.UUID,
       allowNull: false,
-      references: {
-        model: "Products",
-        key: "id",
-      },
     },
-    order_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      references: {
-        model: "Orders",
-        key: "id",
-      },
-    },
-    quantity: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      defaultValue: 1,
+    cartToken: {
+      type: DataTypes.STRING,
     },
   },
   {
@@ -49,6 +29,4 @@ Carts.init(
   },
 );
 
-Carts.belongsTo(Products, { foreignKey: "product_id" });
-Carts.belongsTo(Orders, { foreignKey: "order_id" });
 export default Carts;

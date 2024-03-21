@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import validate from "../service/validateUser";
-import { userType } from "../controllers/users";
+import { UserType } from "../utils/types";
 
 const userValidation = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const user = req.body;
+  const user: UserType = req.body;
+  console.log(user);
   if (validateUser(user)) {
     next();
   } else {
@@ -15,9 +16,9 @@ const userValidation = async (
   }
 };
 
-const validateUser = ({ name, contact, password }: userType): boolean => {
-  const { Password, Contact, Name } = validate;
-  return Password(password) && Contact(contact) && Name(name);
+const validateUser = ({ name, email, password }: UserType): boolean => {
+  const { Password, Email, Name } = validate;
+  return Password(password) && Email(email) && Name(name);
 };
 
 export default userValidation;

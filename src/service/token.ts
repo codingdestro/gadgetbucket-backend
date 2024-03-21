@@ -1,8 +1,7 @@
 import jwt from "jsonwebtoken";
-import { Error } from "sequelize";
 const secret = process.env.SECRET || "secret";
-const createToken = (userId: object | string) => {
-  const token = jwt.sign(userId, secret);
+const createToken = (userId: string) => {
+  const token = jwt.sign({ user_id: userId }, secret);
   return token;
 };
 
