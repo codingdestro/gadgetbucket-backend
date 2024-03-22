@@ -8,11 +8,11 @@ const userAlreadyExists = async (
   next: NextFunction,
 ) => {
   try {
-    const user = await getUser(req.body.contact);
+    const user = await getUser(req.body.email);
     if (!user) {
       next();
     } else {
-      const token = createToken(user.toJSON().id);
+      const token = createToken(user.id);
       res.json({
         msg: "user has already an account",
         token,

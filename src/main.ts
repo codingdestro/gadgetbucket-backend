@@ -7,6 +7,7 @@ config();
 import route from "./routes";
 
 const PORT = Number(process.env.PORT || 5555);
+const HOST = process.env.HOST || "localhost";
 // sequelize.sync({ force: true });
 
 const app = express();
@@ -21,6 +22,6 @@ app.use(bodyParser.json());
 
 app.use(route);
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log("running server on port ", PORT);
 });

@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import * as userRoutes from "../../controllers/users.ts";
 import userAlreadyExists from "../../middleware/userExists.ts";
 import userValidation from "../../middleware/userValidation.ts";

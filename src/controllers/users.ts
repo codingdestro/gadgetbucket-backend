@@ -1,8 +1,8 @@
 import Users from "../models/_users";
-import { isUserExists } from "../service/userExists";
 import { createToken, verifyToken } from "../service/token";
 import { Request, Response } from "express";
 import { UserType } from "../utils/types";
+import { encPassword, validatePassword } from "../utils/hashPassword";
 
 const getUser = async (email: string) => {
   if (!email) return null;
@@ -12,7 +12,7 @@ const getUser = async (email: string) => {
     },
   });
 
-  return user;
+  return user?.toJSON();
 };
 
 export const deleteUser = async (userId: string) => {
@@ -27,7 +27,7 @@ const signin = async (req: Request, res: Response) => {
     const newUser = await Users.create({
       name: user.name,
       email: user.email,
-      password: user.password,
+      password: await encPassword(user.password),
     });
 
     res.json({
@@ -43,26 +43,35 @@ const signin = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
   try {
-    const { contact, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!contact || !password) {
+    if (!email || !password) {
       res.json({
-        msg: "username or contact or password not found!",
+        err: "username or contact or password not found!",
       });
       return;
     }
 
-    const user = await isUserExists(contact);
+    const user = await getUser(email);
+    console.log(user);
 
     if (user === null) {
       res.json({
-        msg: "user does not exits create an account first!",
+        err: "user does not exits create an account first!",
       });
       return;
     }
+
+    //verify the user password
+
+    if (!(await validatePassword(password, user.password))) {
+      res.json({
+        err: "invalid password",
+      });
+    }
     res.json({
       msg: "logged in",
-      token: createToken(user.toJSON().id),
+      token: createToken(user.id),
     });
   } catch (error) {
     console.log("there is an error on login");
