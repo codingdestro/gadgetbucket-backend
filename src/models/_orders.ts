@@ -20,7 +20,7 @@ Orders.init(
       allowNull: false,
     },
     payment: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.NUMBER,
       allowNull: false,
     },
     address: {

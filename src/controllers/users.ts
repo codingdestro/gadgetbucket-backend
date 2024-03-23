@@ -53,7 +53,6 @@ const login = async (req: Request, res: Response) => {
     }
 
     const user = await getUser(email);
-    console.log(user);
 
     if (user === null) {
       res.json({
@@ -84,8 +83,7 @@ const login = async (req: Request, res: Response) => {
 const authenticate = async (req: Request, res: Response) => {
   try {
     const token = req.body.token;
-    const result = verifyToken(token);
-    console.log(result);
+    verifyToken(token);
     res.json({ token: token });
   } catch (error) {
     res.json({ err: false });

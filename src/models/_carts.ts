@@ -1,5 +1,6 @@
 import { sequelize } from "../db";
 import { DataTypes, Model } from "sequelize";
+import Products from "./_products";
 
 class Carts extends Model {}
 
@@ -28,5 +29,7 @@ Carts.init(
     timestamps: false,
   },
 );
+
+Carts.belongsTo(Products);
 
 export default Carts;

@@ -7,7 +7,6 @@ export const encPassword = async (password: string) => {
     const hashedPassword = await hash(password, slatRounds);
     return hashedPassword;
   } catch (error) {
-    console.log(error);
     return null;
   }
 };
@@ -15,12 +14,4 @@ export const encPassword = async (password: string) => {
 export const validatePassword = async (
   password: string,
   hashedPassword: string,
-) => {
-  try {
-    const result = await compare(password, hashedPassword);
-    return result;
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-};
+) => await compare(password, hashedPassword);

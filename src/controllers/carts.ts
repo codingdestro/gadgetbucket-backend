@@ -4,15 +4,16 @@ import Products from "../models/_products";
 import { Request, Response } from "express";
 import Orders from "../models/_orders";
 import Users from "../models/_users";
-import sequelize from "sequelize";
 
+//add product to cart
 const addProductToCart = async (req: Request, res: Response) => {
   try {
-    const { userId, productId, quantity } = req.body;
-    const result = await Carts.create({
-      user_id: userId,
-      product_id: productId,
-      quantity: quantity,
+    const { cartToken, userId, productId } = req.body;
+
+    await Carts.create({
+      userId: userId,
+      productId: productId,
+      cartToken: cartToken,
     });
 
     res.json({
@@ -26,10 +27,11 @@ const addProductToCart = async (req: Request, res: Response) => {
   }
 };
 
+//fetch all products of user according to current cartToken
 const fetchUserCart = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body;
-    if (!userId) {
+    const { cartToken } = req.body;
+    if (!cartToken) {
       res.json({
         err: "empty user id",
       });
@@ -40,11 +42,11 @@ const fetchUserCart = async (req: Request, res: Response) => {
       include: {
         model: Products,
         where: {
-          id: Sequelize.col("Carts.product_id"),
+          id: Sequelize.col("Carts.productId"),
         },
       },
       where: {
-        user_id: userId,
+        cartToken: cartToken,
       },
     });
     res.json({
@@ -59,6 +61,7 @@ const fetchUserCart = async (req: Request, res: Response) => {
   }
 };
 
+//remove a single cart item from cart
 const removeProductFromCart = async (req: Request, res: Response) => {
   try {
     const { cartId } = req.body;
@@ -80,51 +83,33 @@ const removeProductFromCart = async (req: Request, res: Response) => {
 };
 const makeOrderFromCart = async (req: Request, res: Response) => {
   try {
-    const { cartId, userId, quantity } = req.body;
-    if (!cartId && !userId) {
+    const { cartToken, userId, payment, address, contact } = req.body;
+    if (!cartToken && !userId) {
       res.json({ msg: "cartId or userId not found!" });
       return;
     }
-    const cart = (
-      await Carts.findOne({
-        attributes: ["Product.price"],
-        include: {
-          model: Products,
-          where: { id: sequelize.col("Carts.product_id") },
-        },
-        where: {
-          id: cartId,
-        },
-      })
-    )?.toJSON();
-    console.log(cart);
-    const user = (await Users.findOne({ where: { id: userId } }))?.toJSON();
-    if (!cart && !user) {
-      console.error("user or cart is empty!");
-      res.sendStatus(404);
-      return;
-    }
+
     const done = await Orders.create({
-      cartId: cartId,
-      price: cart.Product.price,
-      quantity: quantity,
-      address: user.address,
-      contact: user.contact,
+      cartToken: cartToken,
+      payment: payment,
+      userId: userId,
+      address: address,
+      contact: contact,
     });
-    const order = done.toJSON();
-    //adding order id to cart
-    const result = await Carts.update(
+
+    await Users.update(
       {
-        order_id: order.id,
+        cartToken: "",
       },
       {
-        where: { id: cartId },
+        where: {
+          id: userId,
+        },
       },
     );
-    console.log(result);
+
     res.json({ done });
   } catch (error) {
-    console.log(error);
     res
       .json({
         msg: "faild to make order!",
