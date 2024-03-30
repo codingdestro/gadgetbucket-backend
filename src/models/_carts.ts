@@ -15,7 +15,7 @@ Carts.init(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    productId: {
+    pdId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
@@ -30,6 +30,7 @@ Carts.init(
   },
 );
 
-Carts.belongsTo(Products);
+Carts.belongsTo(Products, { foreignKey: "pdId" });
+Carts.hasMany(Products, { foreignKey: "id" });
 
 export default Carts;

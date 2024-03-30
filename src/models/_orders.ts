@@ -19,8 +19,12 @@ Orders.init(
       type: DataTypes.UUID,
       allowNull: false,
     },
+    cartToken: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
     payment: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     address: {

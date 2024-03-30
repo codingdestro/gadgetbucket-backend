@@ -1,20 +1,39 @@
-import { Sequelize } from "sequelize";
 import Carts from "../models/_carts";
-import Products from "../models/_products";
 import { Request, Response } from "express";
 import Orders from "../models/_orders";
 import Users from "../models/_users";
+import { sequelize } from "../db/index.ts";
+import sq from "sequelize";
 
 //add product to cart
+
+export const addToCartHandler = async (cartItem: {
+  userId: string;
+  productId: string;
+  cartToken: string;
+}) => {
+  const cart = await Carts.create({ ...cartItem, pdId: cartItem.productId });
+  return cart;
+};
+
+export const makeOrderHandler = async (orderItem: {
+  cartToken: string;
+  payment: string;
+  userId: string;
+  address: string;
+  contact: string;
+}) => {
+  const order = await Orders.create({
+    ...orderItem,
+  });
+  return order;
+};
+
 const addProductToCart = async (req: Request, res: Response) => {
   try {
-    const { cartToken, userId, productId } = req.body;
+    // const { cartToken, userId, productId } = req.body;
 
-    await Carts.create({
-      userId: userId,
-      productId: productId,
-      cartToken: cartToken,
-    });
+    await addToCartHandler({ ...req.body });
 
     res.json({
       msg: "successfully added your product to cart",
@@ -38,17 +57,28 @@ const fetchUserCart = async (req: Request, res: Response) => {
       return;
     }
 
-    const carts = await Carts.findAll({
-      include: {
-        model: Products,
-        where: {
-          id: Sequelize.col("Carts.productId"),
-        },
-      },
-      where: {
-        cartToken: cartToken,
-      },
+    const rewQuery = `select Carts.id,title,price,textPrice,category,subCategory,img  from Carts join 
+Products on Products.id = Carts.pdId where Carts.cartToken = '${cartToken}'`;
+
+    const carts = await sequelize.query(rewQuery, {
+      type: sq.QueryTypes.SELECT,
     });
+
+    // const carts = await Carts.findAll({
+    //   attributes: ["id"],
+    //   include: {
+    //     model: Products,
+    //     required: true,
+    //     where: {
+    //       id: Sequelize.col("Carts.pdId"),
+    //     },
+    //   },
+    //   where: {
+    //     cartToken: cartToken,
+    //   },
+    // });
+    console.log(carts);
+
     res.json({
       msg: "successfully fetched cart",
       carts,
@@ -83,19 +113,12 @@ const removeProductFromCart = async (req: Request, res: Response) => {
 };
 const makeOrderFromCart = async (req: Request, res: Response) => {
   try {
-    const { cartToken, userId, payment, address, contact } = req.body;
+    const { cartToken, userId } = req.body;
     if (!cartToken && !userId) {
       res.json({ msg: "cartId or userId not found!" });
       return;
     }
-
-    const done = await Orders.create({
-      cartToken: cartToken,
-      payment: payment,
-      userId: userId,
-      address: address,
-      contact: contact,
-    });
+    const done = await makeOrderHandler(req.body);
 
     await Users.update(
       {

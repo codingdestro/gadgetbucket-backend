@@ -54,7 +54,7 @@ const login = async (req: Request, res: Response) => {
 
     const user = await getUser(email);
 
-    if (user === null) {
+    if (user === null || user === undefined) {
       res.json({
         err: "user does not exits create an account first!",
       });

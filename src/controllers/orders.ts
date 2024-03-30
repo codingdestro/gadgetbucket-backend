@@ -1,36 +1,56 @@
 import Orders from "../models/_orders";
+import { Op } from "sequelize";
+import { Request, Response } from "express";
+import { addToCartHandler, makeOrderHandler } from "./carts";
+import { v4 as uuidv4 } from "uuid";
+import { verifyToken } from "../service/token";
 
-const makeOrder = async (userId: string, productId: string) => {
+// const makeOrder = async (userId: string, productId: string) => {
+export const makeOrder = async (req: Request, res: Response) => {
   try {
-    const order = await Orders.create({
-      user_id: userId,
-      product_id: productId,
+    const userId = verifyToken(req.body.token);
+    const cartToken = uuidv4();
+    await addToCartHandler({ ...req.body, cartToken, userId });
+    await makeOrderHandler({ ...req.body, cartToken, userId });
+    res.json({
+      msg: "order completed",
     });
-    console.log(order);
-    console.log(order.toJSON());
-    return order;
   } catch (error) {
-    throw error;
+    res.json({ err: "failed to make an order" });
   }
 };
 
-const makeOrdersFromCarts = async (userId: string) => {
+export const cancelOrder = async (req: Request, res: Response) => {
   try {
+    const orderId = req.body.orderId;
+    await Orders.update({ status: "canceled" }, { where: { id: orderId } });
+    res.json({
+      msg: "order cancelled",
+    });
   } catch (error) {
-    throw error;
+    res.json({ err: "failed to cancel the order" });
   }
 };
 
-const cancelOrder = async (orderId: string) => {
+export const fetchOrders = async (req: Request, res: Response) => {
   try {
-    const res = await Orders.update(
-      { status: "canceled" },
-      { where: { id: orderId } },
-    );
-    return res;
+    const token = req.body.token;
+    const userId = verifyToken(token);
+    const orders = await Orders.findAll({
+      where: {
+        userId: userId,
+        status: {
+          [Op.not]: "delivered",
+        },
+      },
+    });
+    res.json({
+      msg: "fetched orders",
+      orders,
+    });
   } catch (error) {
-    throw error;
+    res.json({
+      err: "failed to fetch orders",
+    });
   }
 };
-
-export { makeOrder, makeOrdersFromCarts, cancelOrder };
