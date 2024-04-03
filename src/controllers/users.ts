@@ -73,7 +73,6 @@ const login = async (req: Request, res: Response) => {
       token: createToken(user.id),
     });
   } catch (error) {
-    console.log("there is an error on login");
     res.json({
       err: "failed to login user",
     });

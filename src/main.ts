@@ -18,7 +18,7 @@ sequelize
     console.error("failed to connect database!");
   });
 
-const app = express();
+export const app = express();
 app.use(
   cors({
     origin: "*",
@@ -29,15 +29,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(route);
-app.get("/", async (req, res) => {
+app.get("/sync", async (req, res) => {
   try {
     await sequelize.sync();
+    res.json({ msg: "sync the database" });
   } catch (error) {
-    console.log(error);
+    res.json({ err: "error to sync the database" });
   }
-  res.json({ msg: "hello world from docker file" });
 });
 
 app.listen(PORT, HOST, () => {
-  console.log("running server on port ", PORT);
+  console.log(`running server on ${HOST}:${PORT}`);
 });

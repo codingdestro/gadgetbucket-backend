@@ -6,6 +6,7 @@ export const sequelize = new Sequelize({
   password: "password",
   database: "gadgetWeb",
   dialect: "mysql",
+  logging: false,
 });
 
 export const initDB = () => {

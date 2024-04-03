@@ -77,7 +77,6 @@ Products on Products.id = Carts.pdId where Carts.cartToken = '${cartToken}'`;
     //     cartToken: cartToken,
     //   },
     // });
-    console.log(carts);
 
     res.json({
       msg: "successfully fetched cart",
