@@ -4,8 +4,8 @@ import { app } from "../src/main";
 
 let token = "";
 const user = {
-  email: "anas@gmail.com",
-  password: "secretpwd",
+  email: "test@gmail.com",
+  password: "test",
 };
 describe("handling the user cart", () => {
   let productId = "";

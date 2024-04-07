@@ -1,4 +1,4 @@
-import express, { NextFunction } from "express";
+import express from "express";
 import bodyParser from "body-parser";
 import { config } from "dotenv";
 import { sequelize } from "./db";
@@ -29,14 +29,6 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-//dev middleware for delay the request
-const middle = (y: unknown, x: unknown, next: NextFunction) => {
-  setTimeout(() => {
-    next();
-  }, 0);
-};
-
-app.use(middle);
 app.use(route);
 app.listen(PORT, HOST, () => {
   console.log(`running server on ${HOST}:${PORT}`);

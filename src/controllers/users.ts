@@ -47,7 +47,7 @@ const login = async (req: Request, res: Response) => {
 
     if (!email || !password) {
       res.json({
-        err: "username or contact or password not found!",
+        err: "username or password not found!",
       });
       return;
     }

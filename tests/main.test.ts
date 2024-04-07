@@ -3,19 +3,11 @@ import request from "supertest";
 import { app } from "../src/main";
 
 const user = {
-  name: "mohdanas",
-  email: "anas@gmail.com",
-  password: "secretpwd",
+  name: "test",
+  email: "test@gmail.com",
+  password: "test",
 };
 let userToken = "";
-//
-// describe("start the server and sync the database", () => {
-//   test("sync the database GET /", async () => {
-//     const res = await request(app).get("/sync").expect(200);
-//     expect(res.body).toEqual({ msg: "sync the database" });
-//   });
-// });
-//
 describe("handling the users", () => {
   const agent = request.agent(app);
   test("singin with validated request body", async () => {
@@ -23,7 +15,9 @@ describe("handling the users", () => {
       .post("/account/signin")
       .send({ ...user })
       .expect(200);
-    expect(res.body).toContainKey("msg");
+    if (res.body.msg) expect(res.body.msg).toEqual("new user created");
+    else if (res.body.err)
+      expect(res.body.err).toEqual("user has already an account");
   });
 
   test("login in with correct email and password", async () => {
@@ -38,7 +32,7 @@ describe("handling the users", () => {
   });
 
   test("authenticate user token", async () => {
-    const res = await agent
+    await agent
       .post("/account/authenticate")
       .send({ token: userToken })
       .expect(200);
