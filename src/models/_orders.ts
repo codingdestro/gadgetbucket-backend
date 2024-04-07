@@ -38,7 +38,7 @@ Orders.init(
   },
   {
     sequelize,
-    modelName: "Orders",
+    modelName: "orders",
   },
 );
 

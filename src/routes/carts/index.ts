@@ -6,7 +6,7 @@ const route = Router();
 
 route.post("/add", getUserInfoFromToken, cartsRoute.addProductToCart);
 route.post("/get", getUserInfoFromToken, cartsRoute.fetchUserCart);
-route.post("/makeOrder", getUserInfoFromToken, cartsRoute.makeOrderFromCart);
+route.post("/checkout", getUserInfoFromToken, cartsRoute.makeOrderFromCart);
 route.delete("/remove", cartsRoute.removeProductFromCart);
 
 export default route;

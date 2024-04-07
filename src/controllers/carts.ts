@@ -1,9 +1,8 @@
 import Carts from "../models/_carts";
 import { Request, Response } from "express";
 import Orders from "../models/_orders";
-import Users from "../models/_users";
-import { sequelize } from "../db/index.ts";
-import sq from "sequelize";
+import Products from "../models/_products.ts";
+import Users from "../models/_users.ts";
 
 //add product to cart
 
@@ -32,6 +31,7 @@ export const makeOrderHandler = async (orderItem: {
 const addProductToCart = async (req: Request, res: Response) => {
   try {
     // const { cartToken, userId, productId } = req.body;
+    console.log(req.body);
 
     await addToCartHandler({ ...req.body });
 
@@ -46,6 +46,23 @@ const addProductToCart = async (req: Request, res: Response) => {
   }
 };
 
+const getProductsFromCart = async (cartToken: string) => {
+  const carts: Carts[] = await Carts.findAll({
+    attributes: ["id"],
+    include: {
+      model: Products,
+      foreignKey: "carts.pdId",
+    },
+    where: {
+      cartToken,
+    },
+  });
+  let payment = 0;
+  for (let i = 0; i < carts.length; i++) {
+    payment += carts[i].toJSON().product.price;
+  }
+  return { carts, payment };
+};
 //fetch all products of user according to current cartToken
 const fetchUserCart = async (req: Request, res: Response) => {
   try {
@@ -57,30 +74,12 @@ const fetchUserCart = async (req: Request, res: Response) => {
       return;
     }
 
-    const rewQuery = `select Carts.id,title,price,textPrice,category,subCategory,img  from Carts join 
-Products on Products.id = Carts.pdId where Carts.cartToken = '${cartToken}'`;
-
-    const carts = await sequelize.query(rewQuery, {
-      type: sq.QueryTypes.SELECT,
-    });
-
-    // const carts = await Carts.findAll({
-    //   attributes: ["id"],
-    //   include: {
-    //     model: Products,
-    //     required: true,
-    //     where: {
-    //       id: Sequelize.col("Carts.pdId"),
-    //     },
-    //   },
-    //   where: {
-    //     cartToken: cartToken,
-    //   },
-    // });
+    const { carts, payment } = await getProductsFromCart(cartToken);
 
     res.json({
       msg: "successfully fetched cart",
       carts,
+      payment,
     });
   } catch (error) {
     console.log(error);
@@ -117,7 +116,8 @@ const makeOrderFromCart = async (req: Request, res: Response) => {
       res.json({ msg: "cartId or userId not found!" });
       return;
     }
-    const done = await makeOrderHandler(req.body);
+    const { payment } = await getProductsFromCart(cartToken);
+    const done = await makeOrderHandler({ ...req.body, payment });
 
     await Users.update(
       {
@@ -130,7 +130,7 @@ const makeOrderFromCart = async (req: Request, res: Response) => {
       },
     );
 
-    res.json({ done });
+    res.json({ msg: "successfully confirm order", done });
   } catch (error) {
     res
       .json({

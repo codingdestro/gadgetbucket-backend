@@ -1,34 +1,41 @@
 import Orders from "../models/_orders";
-import { Op } from "sequelize";
 import { Request, Response } from "express";
 import { addToCartHandler, makeOrderHandler } from "./carts";
 import { v4 as uuidv4 } from "uuid";
 import { verifyToken } from "../service/token";
+import Products from "../models/_products";
 
 // const makeOrder = async (userId: string, productId: string) => {
+const getPaymentFromProduct = async (productId: string) => {
+  return (await Products.findOne({ where: { id: productId } }))?.toJSON()
+    ?.price;
+};
 export const makeOrder = async (req: Request, res: Response) => {
   try {
     const userId = verifyToken(req.body.token);
     const cartToken = uuidv4();
+    const payment = await getPaymentFromProduct(req.body.productId);
+    console.log(payment);
     await addToCartHandler({ ...req.body, cartToken, userId });
-    await makeOrderHandler({ ...req.body, cartToken, userId });
+    await makeOrderHandler({ ...req.body, cartToken, userId, payment });
     res.json({
       msg: "order completed",
     });
   } catch (error) {
+    console.log(error);
     res.json({ err: "failed to make an order" });
   }
 };
 
-export const cancelOrder = async (req: Request, res: Response) => {
+export const updateStatusOfOrder = async (req: Request, res: Response) => {
   try {
-    const orderId = req.body.orderId;
-    await Orders.update({ status: "canceled" }, { where: { id: orderId } });
+    const { orderId, status } = req.body;
+    await Orders.update({ status }, { where: { id: orderId } });
     res.json({
-      msg: "order cancelled",
+      msg: "status updated",
     });
   } catch (error) {
-    res.json({ err: "failed to cancel the order" });
+    res.json({ err: "failed to update status of  the order" });
   }
 };
 
@@ -39,9 +46,6 @@ export const fetchOrders = async (req: Request, res: Response) => {
     const orders = await Orders.findAll({
       where: {
         userId: userId,
-        status: {
-          [Op.not]: "delivered",
-        },
       },
     });
     res.json({

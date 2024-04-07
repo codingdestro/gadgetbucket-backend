@@ -1,4 +1,3 @@
-import { createToken } from "../service/token";
 import { Request, Response, NextFunction } from "express";
 import { getUser } from "../controllers/users";
 
@@ -12,10 +11,8 @@ const userAlreadyExists = async (
     if (!user) {
       next();
     } else {
-      const token = createToken(user.id);
       res.json({
-        msg: "user has already an account",
-        token,
+        err: "user has already an account",
       });
     }
   } catch (error) {

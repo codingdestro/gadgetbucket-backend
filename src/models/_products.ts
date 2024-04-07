@@ -19,7 +19,7 @@ Products.init(
       allowNull: false,
     },
     price: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     textPrice: {
@@ -35,7 +35,7 @@ Products.init(
       allowNull: false,
     },
   },
-  { sequelize, modelName: "Products", timestamps: false },
+  { sequelize, modelName: "products", timestamps: false },
 );
 
 export default Products;
