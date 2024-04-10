@@ -82,8 +82,9 @@ const login = async (req: Request, res: Response) => {
 const authenticate = async (req: Request, res: Response) => {
   try {
     const token = req.body.token;
-    verifyToken(token);
-    res.json({ token: token });
+    const userId = verifyToken(token);
+    const user = await Users.findByPk(userId);
+    res.json(user?.toJSON()?.id === userId ? { token: token } : { err: false });
   } catch (error) {
     res.json({ err: false });
   }

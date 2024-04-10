@@ -45,3 +45,22 @@ export const fetchProductWithOffset = async (req: Request, res: Response) => {
     products,
   });
 };
+
+export const addProduct = async (req: Request, res: Response) => {
+  try {
+    const { img, title, price, category, subCategory } = req.body;
+    const pd = {
+      img,
+      title,
+      price: parseFloat(price.slice(1).split(",").join("")),
+      textPrice: price,
+      category,
+      subCategory,
+    };
+    await Products.create(pd);
+    res.send(200).json({ msg: "product added" });
+  } catch (error) {
+    console.log(error);
+    res.send(300).json({ msg: "failed to add product" });
+  }
+};

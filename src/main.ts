@@ -1,23 +1,19 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { config } from "dotenv";
-import { sequelize } from "./db";
+import { initDB } from "./db";
 import cors from "cors";
+import conf from "./__config__";
 config();
 import route from "./routes";
 
-const PORT = Number(process.env.PORT || 5555);
-const HOST = process.env.HOST || "localhost";
-//checking the mysql connection
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("connected");
-  })
-  .catch((err) => {
-    console.log(err);
-    console.error("failed to connect database!");
-  });
+const PORT = conf.get("server_port");
+const HOST = conf.get("server_host") || "localhost";
+
+console.log("trying to connect with database ...");
+setTimeout(async () => {
+  await initDB();
+}, 5000);
 
 export const app = express();
 app.use(
@@ -30,6 +26,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(route);
+
 app.listen(PORT, HOST, () => {
-  console.log(`running server on ${HOST}:${PORT}`);
+  console.log(`\033[0;32m running server on \033[0;35m${HOST}:${PORT} \033[0m`);
 });

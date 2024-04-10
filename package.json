@@ -4,7 +4,7 @@
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
   "scripts": {
-    "build": "tsc . -p",
+    "build": "tsc ./src/ -p",
     "ts": "tsc-watch --onSuccess \" node src/index.js\"",
     "dev": "bun run src/main.ts",
     "watch": "bun --watch src/main.ts "
@@ -15,7 +15,6 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.5",
-    "@types/mysql": "^2.15.25",
     "@types/sequelize": "^4.28.20",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^9.0.8",
@@ -23,6 +22,10 @@
     "@typescript-eslint/parser": "^7.3.1",
     "axios": "^1.6.7",
     "eslint": "^8.57.0",
+    "mock-aws-s3": "^4.0.2",
+    "aws-sdk": "^2.1594.0",
+    "nock": "^13.5.4",
+    "@types/mocha": "^10.0.6",
     "supertest": "^6.3.4"
   },
   "peerDependencies": {
@@ -30,15 +33,12 @@
   },
   "dependencies": {
     "@sequelize/core": "^7.0.0-alpha.37",
-    "@types/mocha": "^10.0.6",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "mysql": "^2.18.1",
-    "mysql2": "^3.9.1",
     "pg": "^8.11.5",
     "sequelize": "^6.36.0",
     "uuid": "^9.0.1"

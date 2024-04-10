@@ -2,8 +2,9 @@ import { Router } from "express";
 import * as productRoutes from "../../controllers/products.ts";
 
 const productRouter = Router();
-productRouter.get("/get", productRoutes.fetchAllProducts);
-productRouter.get("/get/product", productRoutes.fetchProduct);
-productRouter.get("/get/products", productRoutes.fetchProductWithOffset);
+productRouter.post("/get", productRoutes.fetchAllProducts);
+productRouter.post("/get/product", productRoutes.fetchProduct);
+productRouter.post("/get/products", productRoutes.fetchProductWithOffset);
+productRouter.post("/add", productRoutes.addProduct);
 
 export default productRouter;
