@@ -1,6 +1,6 @@
 # use the official Bun image
 FROM oven/bun:1 as base
-WORKDIR /app
+WORKDIR /usr/app
 
 # install dependencies into temp directory
 
@@ -10,6 +10,8 @@ RUN mkdir src
 
 COPY src ./src/
 
+RUN bun build ./src/main.ts --outdir ./dist --target "bun"
+
 # USER bun
 EXPOSE 5555
-ENTRYPOINT [ "bun", "run", "/app/src/main.ts" ]
+ENTRYPOINT [ "bun", "run", "dist/main.js" ]
