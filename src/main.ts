@@ -22,19 +22,23 @@ app.use(
   }),
 );
 
-const shutdown = ()=>{
-  server.close(()=>console.log('closing the server first'))
+const shutdown = () => {
+  server.close(() => console.log('closing the server first'))
   console.log("system is shuting down! ...")
   process.exit(0)
 }
-process.on('SIGINT',shutdown)
-process.on('SIGTERM',shutdown)
-process.on('SIGQUIT',shutdown)
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
+process.on('SIGQUIT', shutdown)
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(route);
+app.get('/test', (_, res) => {
+  res.json({ "msg": "test complete" })
+
+})
 
 var server = app.listen(PORT, HOST, () => {
   console.log(`\033[0;32m running server on \033[0;35m${HOST}:${PORT} \033[0m`);
