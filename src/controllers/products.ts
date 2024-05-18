@@ -49,6 +49,7 @@ export const fetchProductWithOffset = async (req: Request, res: Response) => {
 export const addProduct = async (req: Request, res: Response) => {
   try {
     const { img, title, price, category, subCategory } = req.body;
+    console.log(req.body);
     const pd = {
       img,
       title,

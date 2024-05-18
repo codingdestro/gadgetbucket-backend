@@ -14,15 +14,17 @@ const readCsvData = async (
       .split("\n")
       .map(async (ele: string) => {
         const product = ele.split("!");
-        const res = await axios.post("http://localhost:5555/products/add", {
-          img: product[0],
-          title: product[1],
-          price: product[2],
-          textPrice: product[2],
-          category,
-          subCategory,
-        });
-        console.log(res.status, res.data);
+        if (product.length >= 3) {
+          const res = await axios.post("http://localhost:5000/products/add", {
+            img: product[0],
+            title: product[1],
+            price: product[2],
+            textPrice: product[2],
+            category,
+            subCategory,
+          });
+          console.log(res.status, res.data);
+        }
       });
   });
 };
