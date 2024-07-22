@@ -2,18 +2,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import { config } from "dotenv";
 config();
-import { initDB } from "./db";
 import cors from "cors";
 import conf from "./__config__";
 import route from "./routes";
+import { db } from "./db";
 
 const PORT = conf.get("server_port");
 const HOST = conf.get("server_host") || "localhost";
-
-console.log("trying to connect with database ...");
-setTimeout(async () => {
-  await initDB();
-}, 5000);
 
 export const app = express();
 app.use(
@@ -34,11 +29,7 @@ process.on('SIGQUIT', shutdown)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use(route);
-app.get('/test', (_, res) => {
-  res.json({ "msg": "test complete" })
-
-})
+// app.use(route);
 
 var server = app.listen(PORT, HOST, () => {
   console.log(`\033[0;32m running server on \033[0;35m${HOST}:${PORT} \033[0m`);

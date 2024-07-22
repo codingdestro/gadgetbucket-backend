@@ -1,22 +1,25 @@
-import { Sequelize } from "sequelize";
+import { drizzle } from "drizzle-orm/node-postgres";
 import conf from "../__config__";
+import * as schema from "../schema/index.ts";
 
-export const sequelize = new Sequelize({
+import { Client } from "pg";
+export const client = new Client({
   host: conf.get("db_host"),
   port: conf.get("db_port"),
-  username: conf.get("db_user"),
+  user: conf.get("db_user"),
   password: conf.get("db_password"),
   database: conf.get("db_database"),
-  dialect: "postgres",
-  logging: false,
 });
 
-export const initDB = async () => {
+async function initDb() {
   try {
-    await sequelize.authenticate();
-    console.log("connected");
-    await sequelize.sync();
+    console.log("trying to connect with database ...");
+    await client.connect();
+    console.log("connected to the database!");
+    const db = drizzle(client, { schema });
+    return db;
   } catch (error) {
-    console.error("failed to connect database!");
+    console.log(error);
   }
-};
+}
+export const db = await initDb();
