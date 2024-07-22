@@ -8,7 +8,6 @@ const userValidation = async (
   next: NextFunction,
 ) => {
   const user: UserType = req.body;
-  console.log(user);
   if (validateUser(user)) {
     next();
   } else {

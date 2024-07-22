@@ -7,6 +7,7 @@ const config = {
   db_database: process.env.DB_DATABASE,
   server_host: process.env.SERVER_HOST,
   server_port: process.env.SERVER_PORT,
+  migrate: process.env.MIRGRATE || true,
   get(key) {
     let val = this[key];
     if (val) return val;

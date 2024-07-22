@@ -29,7 +29,7 @@ process.on('SIGQUIT', shutdown)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// app.use(route);
+app.use(route);
 
 var server = app.listen(PORT, HOST, () => {
   console.log(`\033[0;32m running server on \033[0;35m${HOST}:${PORT} \033[0m`);
