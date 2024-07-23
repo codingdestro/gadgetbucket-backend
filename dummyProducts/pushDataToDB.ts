@@ -15,7 +15,7 @@ const readCsvData = async (
       .map(async (ele: string) => {
         const product = ele.split("!");
         if (product.length >= 3) {
-          const res = await axios.post("http://localhost:5000/products/add", {
+          await axios.post("http://localhost:5000/products/add", {
             img: product[0],
             title: product[1],
             price: product[2],
@@ -23,7 +23,7 @@ const readCsvData = async (
             category,
             subCategory,
           });
-          console.log(res.status, res.data);
+          // console.log(res.status, res.data);
         }
       });
   });
