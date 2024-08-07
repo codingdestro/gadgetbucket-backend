@@ -1,17 +1,18 @@
-import Carts from "../models/_carts";
 import { Request, Response } from "express";
-import Orders from "../models/_orders";
-import Products from "../models/_products.ts";
-import Users from "../models/_users.ts";
+import { carts, Users, products, orders } from "../schema/";
+import { db } from "../db";
+import { eq } from "drizzle-orm";
 
 //add product to cart
-
 export const addToCartHandler = async (cartItem: {
   userId: string;
   productId: string;
   cartToken: string;
 }) => {
-  const cart = await Carts.create({ ...cartItem, pdId: cartItem.productId });
+  const cart = await db?.insert(carts).values({
+    ...cartItem,
+    pdId: cartItem.productId,
+  });
   return cart;
 };
 
@@ -22,7 +23,7 @@ export const makeOrderHandler = async (orderItem: {
   address: string;
   contact: string;
 }) => {
-  const order = await Orders.create({
+  const order = await db?.insert(orders).values({
     ...orderItem,
   });
   return order;
@@ -31,7 +32,6 @@ export const makeOrderHandler = async (orderItem: {
 const addProductToCart = async (req: Request, res: Response) => {
   try {
     // const { cartToken, userId, productId } = req.body;
-    console.log(req.body);
 
     await addToCartHandler({ ...req.body });
 
@@ -47,21 +47,18 @@ const addProductToCart = async (req: Request, res: Response) => {
 };
 
 const getProductsFromCart = async (cartToken: string) => {
-  const carts: Carts[] = await Carts.findAll({
-    attributes: ["id"],
-    include: {
-      model: Products,
-      foreignKey: "carts.pdId",
-    },
-    where: {
-      cartToken,
-    },
-  });
+  const cart = await db
+    ?.select({ id: carts.id, products })
+    .from(carts)
+    .innerJoin(products, eq(carts.pdId, products.id))
+    .where(eq(carts.cartToken, cartToken));
+
   let payment = 0;
-  for (let i = 0; i < carts.length; i++) {
-    payment += carts[i].toJSON().product.price;
+  if (!cart) return { cart: null, payment: null };
+  for (let i = 0; i < cart.length; i++) {
+    payment += cart[i].products!.price;
   }
-  return { carts, payment };
+  return { cart, payment };
 };
 //fetch all products of user according to current cartToken
 const fetchUserCart = async (req: Request, res: Response) => {
@@ -74,12 +71,19 @@ const fetchUserCart = async (req: Request, res: Response) => {
       return;
     }
 
-    const { carts, payment } = await getProductsFromCart(cartToken);
+    const { cart, payment } = await getProductsFromCart(cartToken)!;
+
+    if (!cart || !payment) {
+      res.json({
+        msg: "not found cart and product",
+      });
+      return;
+    }
 
     res.json({
       msg: "successfully fetched cart",
-      carts,
-      payment,
+      cart: [...cart],
+      payment: payment,
     });
   } catch (error) {
     console.log(error);
@@ -97,7 +101,7 @@ const removeProductFromCart = async (req: Request, res: Response) => {
       res.json({ err: "empty cart id" });
       return;
     }
-    const done = await Carts.destroy({ where: { id: cartId } });
+    const done = await db?.delete(carts).where(eq(carts.id, cartId));
     res.json(
       done
         ? { msg: "successfully removed item from your cart" }
@@ -112,23 +116,19 @@ const removeProductFromCart = async (req: Request, res: Response) => {
 const makeOrderFromCart = async (req: Request, res: Response) => {
   try {
     const { cartToken, userId } = req.body;
-    if (!cartToken && !userId) {
+    if (!cartToken || !userId) {
       res.json({ msg: "cartId or userId not found!" });
       return;
     }
     const { payment } = await getProductsFromCart(cartToken);
     const done = await makeOrderHandler({ ...req.body, payment });
 
-    await Users.update(
-      {
+    await db
+      ?.update(Users)
+      .set({
         cartToken: "",
-      },
-      {
-        where: {
-          id: userId,
-        },
-      },
-    );
+      })
+      .where(eq(Users.id, userId));
 
     res.json({ msg: "successfully confirm order", done });
   } catch (error) {

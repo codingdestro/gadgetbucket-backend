@@ -5,4 +5,5 @@ export const Users = pgTable("users", {
   name: varchar("name", { length: 50 }).notNull(),
   password: text("password").notNull(),
   email: text("email").notNull(),
+  cartToken: text("carttoken"),
 });

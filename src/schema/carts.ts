@@ -3,9 +3,9 @@ import { products } from "./products";
 
 export const carts = pgTable("carts", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("userId").notNull(),
-  pdId: uuid("pdId")
+  userId: uuid("userid").notNull(),
+  pdId: uuid("pdid")
     .notNull()
     .references(() => products.id),
-  cartToken: text("cartToken"),
+  cartToken: text("carttoken"),
 });

@@ -11,8 +11,8 @@ export const orderStatus = pgEnum("status", [
 export const orders = pgTable("orders", {
   id: uuid("id").defaultRandom().primaryKey(),
   status: orderStatus("status").default("pending"),
-  userId: uuid("userId").notNull(),
-  cartToken: uuid("cartToken").notNull(),
+  userId: uuid("userid").notNull(),
+  cartToken: uuid("carttoken").notNull(),
   payment: text("payment").notNull(),
   address: text("address").notNull(),
   contact: varchar("contact", { length: 10 }).notNull(),
