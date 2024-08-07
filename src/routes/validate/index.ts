@@ -1,38 +1,36 @@
 import { Router } from "express";
-import Carts from "../../models/_carts";
-import Products from "../../models/_products";
+import { carts, products } from "../../schema";
+import { db } from "../../db";
+import { eq } from "drizzle-orm";
 
 const route = Router();
 
 route.post("/cart/id", async (req, res) => {
   try {
-    const cart = (
-      await Carts.findOne({
-        where: {
-          id: req.body.id,
-        },
-      })
-    )?.toJSON();
+    const cart = await db?.query.carts.findFirst({
+      where: eq(carts.id, req.body.id),
+    });
+
     if (!cart) {
       res.json({ msg: "no cart found!" });
     }
+
     res.json({ msg: "cart found", cart });
   } catch (error) {
     res.json({ err: "failed to validate the cart id" });
   }
 });
+
 route.post("/product/id", async (req, res) => {
   try {
-    const product = (
-      await Products.findOne({
-        where: {
-          id: req.body.id,
-        },
-      })
-    )?.toJSON();
+    const product = await db?.query.products.findFirst({
+      where: eq(products.id, req.body.id),
+    });
+
     if (!product) {
       res.json({ msg: "no product found!" });
     }
+
     res.json({ msg: "product found", product });
   } catch (error) {
     res.json({ err: "failed to validate the product id" });

@@ -13,12 +13,12 @@ const getPaymentFromProduct = async (productId: string) => {
   });
   return product?.price;
 };
+
 export const makeOrder = async (req: Request, res: Response) => {
   try {
     const userId = verifyToken(req.body.token);
     const cartToken = uuidv4();
     const payment = await getPaymentFromProduct(req.body.productId);
-    console.log(payment);
     await addToCartHandler({ ...req.body, cartToken, userId });
     await makeOrderHandler({ ...req.body, cartToken, userId, payment });
     res.json({
@@ -55,6 +55,7 @@ export const fetchOrders = async (req: Request, res: Response) => {
     const orderList = await db?.query.orders.findMany({
       where: eq(orders.userId, userId),
     });
+
     res.json({
       msg: "fetched orders",
       orderList,
