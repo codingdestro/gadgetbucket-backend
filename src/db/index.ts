@@ -1,24 +1,19 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
 import conf from "../__config__";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
+
 import * as schema from "../schema/index.ts";
 
-import { Client } from "pg";
-export const client = new Client({
-  host: conf.get("db_host"),
-  port: conf.get("db_port"),
-  user: conf.get("db_user"),
-  password: conf.get("db_password"),
-  database: conf.get("db_database"),
+export const client = createClient({
+  url: conf.get("db_url"),
+  authToken: conf.get("db_authtoken"),
 });
 
 async function initDb() {
   try {
     console.log("trying to connect with database ...");
-    await client.connect();
-    console.log("connected to the database!");
-    const db = drizzle(client, { schema });
-    await migrate(db, { migrationsFolder: "./drizzle" });
+    const db = await drizzle(client, { schema });
+    console.log("connected to database");
     return db;
   } catch (error) {
     console.log(error);

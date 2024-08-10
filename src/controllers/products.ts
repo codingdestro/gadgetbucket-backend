@@ -1,3 +1,4 @@
+import { exit } from "process";
 import { Request, Response } from "express";
 import { products } from "../schema";
 import { db } from "../db";
@@ -74,10 +75,10 @@ export const addProduct = async (req: Request, res: Response) => {
     };
 
     await db?.insert(products).values(pd);
-    // await Products.create(pd);
     res.json({ msg: "product added" });
   } catch (error) {
     console.log(error);
     res.json({ msg: "failed to add product" });
+    exit(1);
   }
 };

@@ -1,4 +1,4 @@
-import { client } from ".";
+import { client } from "./";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import * as schema from "../schema/index.ts";

@@ -1,8 +1,11 @@
-import { pgTable, text, uuid, varchar } from "drizzle-orm/pg-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { v4 as uuid } from "uuid";
 
-export const Users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 50 }).notNull(),
+export const Users = sqliteTable("users", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => uuid()),
+  name: text("name", { length: 50 }).notNull(),
   password: text("password").notNull(),
   email: text("email").notNull(),
   cartToken: text("carttoken"),

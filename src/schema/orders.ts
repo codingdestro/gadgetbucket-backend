@@ -1,19 +1,14 @@
-import { pgTable, uuid, text, varchar, pgEnum } from "drizzle-orm/pg-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { v4 as uuid } from "uuid";
 
-// Define the order status enum
-export const orderStatus = pgEnum("status", [
-  "ordered",
-  "pending",
-  "cancelled",
-  "delivered",
-]);
-
-export const orders = pgTable("orders", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  status: orderStatus("status").default("pending"),
-  userId: uuid("userid").notNull(),
-  cartToken: uuid("carttoken").notNull(),
+export const orders = sqliteTable("orders", {
+  id: text("id")
+    .primaryKey()
+    .$default(() => uuid()),
+  status: text("status").default("pending"),
+  userId: text("userid").notNull(),
+  cartToken: text("carttoken").notNull(),
   payment: text("payment").notNull(),
   address: text("address").notNull(),
-  contact: varchar("contact", { length: 10 }).notNull(),
+  contact: text("contact", { length: 10 }).notNull(),
 });
