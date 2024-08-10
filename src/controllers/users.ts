@@ -1,4 +1,6 @@
-import Users from "../models/_users";
+import { eq } from "drizzle-orm";
+import { Users } from "../schema";
+import { db } from "../db";
 import { createToken, verifyToken } from "../service/token";
 import { Request, Response } from "express";
 import { UserType } from "../utils/types";
@@ -6,33 +8,50 @@ import { encPassword, validatePassword } from "../utils/hashPassword";
 
 const getUser = async (email: string) => {
   if (!email) return null;
-  const user = await Users.findOne({
-    where: {
-      email,
-    },
+  const user = await db?.query.Users.findFirst({
+    where: eq(Users.email, email),
   });
-
-  return user?.toJSON();
+  return user;
 };
 
 export const deleteUser = async (userId: string) => {
-  const res = await Users.destroy({ where: { id: userId } });
-  return res;
+  const result = await db?.query.Users.findFirst({
+    where: eq(Users.id, userId),
+  });
+  return result;
 };
 
 const signin = async (req: Request, res: Response) => {
   try {
     const user: UserType = req.body;
 
-    const newUser = await Users.create({
-      name: user.name,
-      email: user.email,
-      password: await encPassword(user.password),
-    });
+    const userHashedPassword = await encPassword(user.password);
+    if (!userHashedPassword || !user) {
+      res.json({
+        msg: "null values of user!",
+      });
+      return;
+    }
+
+    const newUser = await db
+      ?.insert(Users)
+      .values({
+        name: user.name,
+        email: user.email,
+        password: userHashedPassword,
+      })
+      .returning({ insertedId: Users.id });
+
+    if (!newUser) {
+      res.json({
+        msg: "failed to insert the user!",
+      });
+      return;
+    }
 
     res.json({
       msg: "new user created",
-      token: createToken(newUser.toJSON().id),
+      token: createToken(newUser[0].insertedId),
     });
   } catch (error) {
     res.json({
@@ -83,8 +102,15 @@ const authenticate = async (req: Request, res: Response) => {
   try {
     const token = req.body.token;
     const userId = verifyToken(token);
-    const user = await Users.findByPk(userId);
-    res.json(user?.toJSON()?.id === userId ? { token: token } : { err: false });
+    // const user = await Users.findByPk(userId);
+    const user = await db?.query.Users.findFirst({
+      where: eq(Users.id, userId),
+    });
+    if (!user) {
+      res.json({ err: false });
+      return;
+    }
+    res.json(user.id === userId ? { token: token } : { err: false });
   } catch (error) {
     res.json({ err: false });
   }

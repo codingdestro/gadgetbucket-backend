@@ -1,21 +1,24 @@
-import Orders from "../models/_orders";
+import { db } from "../db";
+import { orders, products } from "../schema";
+import { eq } from "drizzle-orm";
 import { Request, Response } from "express";
 import { addToCartHandler, makeOrderHandler } from "./carts";
 import { v4 as uuidv4 } from "uuid";
 import { verifyToken } from "../service/token";
-import Products from "../models/_products";
 
 // const makeOrder = async (userId: string, productId: string) => {
 const getPaymentFromProduct = async (productId: string) => {
-  return (await Products.findOne({ where: { id: productId } }))?.toJSON()
-    ?.price;
+  const product = await db?.query.products.findFirst({
+    where: eq(products.id, productId),
+  });
+  return product?.price;
 };
+
 export const makeOrder = async (req: Request, res: Response) => {
   try {
     const userId = verifyToken(req.body.token);
     const cartToken = uuidv4();
     const payment = await getPaymentFromProduct(req.body.productId);
-    console.log(payment);
     await addToCartHandler({ ...req.body, cartToken, userId });
     await makeOrderHandler({ ...req.body, cartToken, userId, payment });
     res.json({
@@ -30,7 +33,13 @@ export const makeOrder = async (req: Request, res: Response) => {
 export const updateStatusOfOrder = async (req: Request, res: Response) => {
   try {
     const { orderId, status } = req.body;
-    await Orders.update({ status }, { where: { id: orderId } });
+    await db
+      ?.update(orders)
+      .set({
+        status: status,
+      })
+      .where(eq(orders.id, orderId));
+
     res.json({
       msg: "status updated",
     });
@@ -43,14 +52,13 @@ export const fetchOrders = async (req: Request, res: Response) => {
   try {
     const token = req.body.token;
     const userId = verifyToken(token);
-    const orders = await Orders.findAll({
-      where: {
-        userId: userId,
-      },
+    const orderList = await db?.query.orders.findMany({
+      where: eq(orders.userId, userId),
     });
+
     res.json({
       msg: "fetched orders",
-      orders,
+      orderList,
     });
   } catch (error) {
     res.json({

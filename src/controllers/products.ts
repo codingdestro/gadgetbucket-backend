@@ -1,11 +1,20 @@
+import { exit } from "process";
 import { Request, Response } from "express";
-import Products from "../models/_products";
+import { products } from "../schema";
+import { db } from "../db";
+import { eq } from "drizzle-orm";
 
 export const fetchAllProducts = async (req: Request, res: Response) => {
-  const products = await Products.findAll();
+  const productList = await db?.query.products.findMany();
+  if (!productList) {
+    res.json({
+      msg: "there no products!",
+    });
+    return;
+  }
   res.json({
     msg: "fetched all products",
-    products,
+    productList,
   });
 };
 
@@ -17,14 +26,21 @@ export const fetchProduct = async (req: Request, res: Response) => {
     });
     return;
   }
-  const product = await Products.findOne({
-    where: {
-      id: productId,
-    },
+
+  const productItem = await db?.query.products.findFirst({
+    where: eq(products.id, productId),
   });
+
+  if (!productItem) {
+    res.json({
+      msg: "no product found!",
+    });
+    return;
+  }
+
   res.json({
     msg: "fetched a product",
-    product,
+    productItem,
   });
 };
 
@@ -36,20 +52,19 @@ export const fetchProductWithOffset = async (req: Request, res: Response) => {
     });
     return;
   }
-  const products = await Products.findAll({
-    offset: Number(offset),
-    limit: Number(limit),
-  });
+  // const products = await Products.findAll({
+  //   offset: Number(offset),
+  //   limit: Number(limit),
+  // });
   res.json({
     msg: "fetched products",
-    products,
+    // products,
   });
 };
 
 export const addProduct = async (req: Request, res: Response) => {
   try {
     const { img, title, price, category, subCategory } = req.body;
-    console.log(req.body);
     const pd = {
       img,
       title,
@@ -58,10 +73,12 @@ export const addProduct = async (req: Request, res: Response) => {
       category,
       subCategory,
     };
-    await Products.create(pd);
-    res.send(200).json({ msg: "product added" });
+
+    await db?.insert(products).values(pd);
+    res.json({ msg: "product added" });
   } catch (error) {
     console.log(error);
-    res.send(300).json({ msg: "failed to add product" });
+    res.json({ msg: "failed to add product" });
+    exit(1);
   }
 };
