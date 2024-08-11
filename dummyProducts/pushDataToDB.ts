@@ -15,7 +15,7 @@ const readCsvData = async (
       .map(async (ele: string) => {
         const product = ele.split("!");
         if (product.length >= 3) {
-          await axios.post("http://192.168.1.81:5000/products/add", {
+          await axios.post("http://127.0.0.1:5000/products/add", {
             img: product[0],
             title: product[1],
             price: product[2],

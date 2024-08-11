@@ -9,7 +9,7 @@
     "dev": "bun run src/main.ts",
     "watch": "bun --watch src/main.ts ",
     "db:generate": "bunx drizzle-kit generate",
-    "db:migrate": "bun ./src/db/migration.ts"
+    "db:migrate": "bun ./src/db/migrate.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

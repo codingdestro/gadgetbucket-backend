@@ -1,10 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { config } from "dotenv";
-config();
 import cors from "cors";
 import conf from "./__config__";
 import route from "./routes";
+
+config();
 
 const PORT = conf.get("server_port");
 const HOST = conf.get("server_host") || "localhost";

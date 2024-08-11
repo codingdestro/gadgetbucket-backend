@@ -5,6 +5,9 @@ export const orders = sqliteTable("orders", {
   id: text("id")
     .primaryKey()
     .$default(() => uuid()),
+  createdAt: text("createdat")
+    .notNull()
+    .$default(() => new Date().toLocaleDateString()),
   status: text("status").default("pending"),
   userId: text("userid").notNull(),
   cartToken: text("carttoken").notNull(),
