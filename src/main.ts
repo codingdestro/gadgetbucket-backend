@@ -11,11 +11,20 @@ const PORT = conf.get("server_port");
 const HOST = conf.get("server_host") || "localhost";
 
 export const app = express();
-app.use(
-  cors({
-    origin: "*",
-  }),
-);
+app
+  .use(
+    cors({
+      origin: "*",
+    }),
+  )
+  .use(bodyParser.urlencoded({ extended: false }))
+  .use(bodyParser.json())
+
+  .use(route);
+
+const server = app.listen(PORT, HOST, () => {
+  console.log(`\x1b[0;32m running server on \x1b[0;35m${HOST}:${PORT} \x1b[0m`);
+});
 
 const shutdown = () => {
   server.close(() => console.log("closing the server first"));
@@ -25,12 +34,3 @@ const shutdown = () => {
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 process.on("SIGQUIT", shutdown);
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-app.use(route);
-
-const server = app.listen(PORT, HOST, () => {
-  console.log(`\x1b[0;32m running server on \x1b[0;35m${HOST}:${PORT} \x1b[0m`);
-});
