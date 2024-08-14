@@ -4,9 +4,10 @@ import { getUserInfoFromToken } from "../../middleware/getUserInfo";
 
 const route = Router();
 
-route.post("/add", getUserInfoFromToken, cartsRoute.addProductToCart);
-route.post("/get", getUserInfoFromToken, cartsRoute.fetchUserCart);
-route.post("/checkout", getUserInfoFromToken, cartsRoute.makeOrderFromCart);
-route.delete("/remove", cartsRoute.removeProductFromCart);
+route
+  .post("/add", getUserInfoFromToken, cartsRoute.addProductToCart)
+  .post("/get", getUserInfoFromToken, cartsRoute.fetchUserCart)
+  .post("/checkout", getUserInfoFromToken, cartsRoute.makeOrderFromCart)
+  .delete("/remove", cartsRoute.removeProductFromCart);
 
 export default route;

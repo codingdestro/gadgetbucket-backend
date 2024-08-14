@@ -9,9 +9,10 @@ import { fetchUserCart } from "../../controllers/carts";
 
 const route = Router();
 
-route.post("/make", makeOrder);
-route.post("/status", updateStatusOfOrder);
-route.post("/get", fetchOrders);
-route.post("/fetch", fetchUserCart);
+route
+  .post("/make", makeOrder)
+  .post("/status", updateStatusOfOrder)
+  .post("/get", fetchOrders)
+  .post("/fetch", fetchUserCart);
 
 export default route;

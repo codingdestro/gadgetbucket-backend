@@ -4,11 +4,13 @@ import usersRoute from "./users";
 import cartsRoute from "./carts";
 import orderRoute from "./orders";
 import validateRoute from "./validate";
+
 const route = Router();
-route.use("/products", productsRoute);
-route.use("/account", usersRoute);
-route.use("/carts", cartsRoute);
-route.use("/orders", orderRoute);
-route.use("/validate", validateRoute);
+route
+  .use("/products", productsRoute)
+  .use("/account", usersRoute)
+  .use("/carts", cartsRoute)
+  .use("/orders", orderRoute)
+  .use("/validate", validateRoute);
 
 export default route;
