@@ -14,13 +14,16 @@ export const app = express();
 app
   .use(
     cors({
-      origin: "*",
+      origin: "https://gadgetbucket.codingdestro.fun/",
     }),
   )
   .use(bodyParser.urlencoded({ extended: false }))
   .use(bodyParser.json())
 
-  .use(route);
+  .use(route)
+  .get("/", (req, res) =>
+    res.cookie("token", "test").json({ message: "helloworld" }),
+  );
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`\x1b[0;32m running server on \x1b[0;35m${HOST}:${PORT} \x1b[0m`);
