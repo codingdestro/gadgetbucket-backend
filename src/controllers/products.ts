@@ -3,8 +3,14 @@ import { Request, Response } from "express";
 import { products } from "../schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
+import { logger } from "../utils/logger";
 
 export const fetchAllProducts = async (req: Request, res: Response) => {
+  logger.info({
+    method: req.method,
+    req: req.url,
+    timestamp: new Date().toISOString(),
+  });
   const productList = await db?.query.products.findMany();
   if (!productList) {
     res.json({
@@ -63,6 +69,11 @@ export const fetchProductWithOffset = async (req: Request, res: Response) => {
 };
 
 export const addProduct = async (req: Request, res: Response) => {
+  logger.info({
+    method: req.method,
+    req: req.url,
+    timestamp: new Date().toISOString(),
+  });
   try {
     const { img, title, price, category, subCategory } = req.body;
     const pd = {

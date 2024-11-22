@@ -14,7 +14,7 @@ export const app = express();
 app
   .use(
     cors({
-      origin: "https://gadgetbucket.codingdestro.fun/",
+      origin: "*",
     }),
   )
   .use(bodyParser.urlencoded({ extended: false }))
