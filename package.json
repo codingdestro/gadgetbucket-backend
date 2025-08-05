@@ -8,8 +8,8 @@
     "ts": "tsc-watch --onSuccess \" node src/index.js\"",
     "dev": "bun run src/main.ts",
     "watch": "bun --watch src/main.ts ",
-    "db:generate": "bunx drizzle-kit generate",
-    "db:migrate": "bun ./src/db/migrate.ts"
+    "db:generate": "bunx prisma generate",
+    "db:migrate": "bunx prisma migrate dev --name init"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.9.0",
+    "@prisma/client": "^6.13.0",
     "aws-sdk": "^2.1594.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",

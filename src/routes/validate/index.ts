@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { carts, products } from "../../schema";
+import { carts, products } from "../../../prisma";
 import { db } from "../../db";
 import { eq } from "drizzle-orm";
 

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../service/token";
 // import Users from "../models/_users";
-import { Users } from "../schema";
+import { Users } from "../../prisma";
 import { db } from "../db";
 import { v4 as uuid4 } from "uuid";
 import { eq } from "drizzle-orm";

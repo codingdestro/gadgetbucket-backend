@@ -1,8 +1,11 @@
+import { PrismaClient } from "@prisma/client";
 class Database {
   private static instance: Database;
+  public prisma: PrismaClient;
 
   private constructor() {
-    // Initialize database connection here
+    this.prisma = new PrismaClient();
+    this.prisma.$connect();
   }
 
   public static getInstance(): Database {
@@ -14,10 +17,16 @@ class Database {
 
   public connect() {
     // Logic to connect to the database
+    this.prisma
+      .$connect()
+      .then(() => console.log("Database connected"))
+      .catch((error: string) =>
+        console.error("Database connection error:", error)
+      );
   }
 
   public disconnect() {
-    // Logic to disconnect from the database
+    this.prisma.$disconnect().then(() => console.log("Database disconnected"));
   }
 }
 

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { Users } from "../schema";
+import { Users } from "../../prisma";
 import { db } from "../db";
 import { createToken, verifyToken } from "../service/token";
 import { Request, Response } from "express";

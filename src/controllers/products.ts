@@ -1,6 +1,6 @@
 import { exit } from "process";
 import { Request, Response } from "express";
-import { products } from "../schema";
+import { products } from "../../prisma";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
 import { logger } from "../utils/logger";

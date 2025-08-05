@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { orders, products } from "../schema";
+import { orders, products } from "../../prisma";
 import { eq } from "drizzle-orm";
 import { Request, Response } from "express";
 import { addToCartHandler, makeOrderHandler } from "./carts";
