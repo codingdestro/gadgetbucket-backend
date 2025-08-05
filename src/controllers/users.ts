@@ -1,118 +1,81 @@
-import { eq } from "drizzle-orm";
-import { Users } from "../../prisma";
-import { db } from "../db";
-import { createToken, verifyToken } from "../service/token";
+import { createToken } from "../service/token";
 import { Request, Response } from "express";
-import { UserType } from "../utils/types";
-import { encPassword, validatePassword } from "../utils/hashPassword";
+import { encryptPassword, validatePassword } from "../utils/hashPassword";
+import { v4 as uuidv4 } from "uuid";
+import Database from "../db";
 
-const getUser = async (email: string) => {
-  if (!email) return null;
-  const user = await db?.query.Users.findFirst({
-    where: eq(Users.email, email),
-  });
-  return user;
-};
+const prisma = Database.getInstance().prisma;
+class UserController {
+  static async register(req: Request, res: Response) {
+    const { fullname, email, password } = req.body;
 
-export const deleteUser = async (userId: string) => {
-  const result = await db?.query.Users.findFirst({
-    where: eq(Users.id, userId),
-  });
-  return result;
-};
-
-const signin = async (req: Request, res: Response) => {
-  try {
-    const user: UserType = req.body;
-
-    const userHashedPassword = await encPassword(user.password);
-    if (!userHashedPassword || !user) {
-      res.json({
-        msg: "null values of user!",
-      });
-      return;
+    if (!fullname || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
     }
 
-    const newUser = await db
-      ?.insert(Users)
-      .values({
-        name: user.name,
-        email: user.email,
-        password: userHashedPassword,
-      })
-      .returning({ insertedId: Users.id });
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUser) {
+      return res.status(409).json({ error: "User already exists" });
+    }
 
+    const hashedPassword = await encryptPassword(password);
+    const newUser = await prisma.user.create({
+      data: {
+        fullname,
+        email,
+        password: hashedPassword,
+        cartToken: uuidv4(), // Use existing cart token or set to null
+      },
+    });
     if (!newUser) {
-      res.json({
-        msg: "failed to insert the user!",
-      });
-      return;
+      return res.status(500).json({ error: "User registration failed" });
     }
 
-    res.json({
-      msg: "new user created",
-      token: createToken(newUser[0].insertedId),
-    });
-  } catch (error) {
-    res.json({
-      msg: "user could't create or found",
-    });
+    return res
+      .status(201)
+      .json({ status: "success", message: "User registered successfully" });
   }
-};
 
-const login = async (req: Request, res: Response) => {
-  try {
+  static async login(req: Request, res: Response) {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      res.json({
-        err: "username or password not found!",
-      });
-      return;
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const user = await getUser(email);
-
-    if (user === null || user === undefined) {
-      res.json({
-        err: "user does not exits create an account first!",
-      });
-      return;
-    }
-
-    //verify the user password
-
-    if (!(await validatePassword(password, user.password))) {
-      res.json({
-        err: "invalid password",
-      });
-    }
-    res.json({
-      msg: "logged in",
-      token: createToken(user.id),
+    const user = await prisma.user.findUnique({
+      where: { email },
     });
-  } catch (error) {
-    res.json({
-      err: "failed to login user",
-    });
-  }
-};
 
-const authenticate = async (req: Request, res: Response) => {
-  try {
-    const token = req.body.token;
-    const userId = verifyToken(token);
-    // const user = await Users.findByPk(userId);
-    const user = await db?.query.Users.findFirst({
-      where: eq(Users.id, userId),
-    });
     if (!user) {
-      res.json({ err: false });
-      return;
+      return res.status(404).json({ error: "User not found" });
     }
-    res.json(user.id === userId ? { token: token } : { err: false });
-  } catch (error) {
-    res.json({ err: false });
+
+    const isValidPassword = await validatePassword(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    const token = createToken(user.id);
+    return res.status(200).json({ token });
   }
-};
-export { getUser, signin, login, authenticate };
+
+  static async logout(req: Request, res: Response) {
+    return res
+      .status(200)
+      .cookie("token", "", {
+        httpOnly: true,
+        expires: new Date(0), // Set cookie expiration to the past
+        secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+        sameSite: "lax", // Prevent CSRF attacks
+      })
+      .json({
+        status: "success",
+        message: "User logged out successfully",
+      });
+  }
+}
+
+export default UserController;
