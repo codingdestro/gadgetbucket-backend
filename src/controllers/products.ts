@@ -20,7 +20,6 @@ class ProductsController {
           id: true,
           name: true,
           description: true,
-          offerPrice: true,
           price: true,
           image: true,
           stockQuantity: true,

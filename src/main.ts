@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import { config } from "dotenv";
 import cors from "cors";
 import Database from "./db";
-import productRouter from "./routes/products";
+import routes from "./routes";
 
 config();
 
@@ -20,7 +20,7 @@ app
   .use(bodyParser.urlencoded({ extended: false }))
   .use(bodyParser.json())
 
-  .use("/api/v1/products", productRouter)
+  .use("/api/v1/", routes)
 
   .get("/health", async (req, res) => {
     res.status(200).json({ message: "Server is running" });

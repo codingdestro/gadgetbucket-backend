@@ -63,7 +63,6 @@ async function seedProducts() {
 
     const data = {
       price: parseFloat(product.price.split("₹")[0]),
-      offerPrice: parseFloat(product.price.split("₹")[0]) * 0.9, // Assuming a 10% discount
       image: product.image,
       name: product.title,
       description: "A high-performance gaming PC",
