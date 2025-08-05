@@ -27,8 +27,8 @@ function seedUsers() {
       await prisma.user.create({
         data: {
           ...user,
-          password: await encryptPassword(user.password),
-          cartToken: uuidv4(),
+          passwordHash: await encryptPassword(user.password),
+          cartSessionId: uuidv4(),
         },
       });
     }
@@ -64,10 +64,9 @@ async function seedProducts() {
     const data = {
       price: parseFloat(product.price.split("₹")[0]),
       offerPrice: parseFloat(product.price.split("₹")[0]) * 0.9, // Assuming a 10% discount
-      img: product.image,
-      title: product.title,
+      image: product.image,
+      name: product.title,
       description: "A high-performance gaming PC",
-      category: "Gaming PC",
     };
 
     await prisma.product.create({
