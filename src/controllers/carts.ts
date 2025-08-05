@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { v4 as uuiv4 } from "uuid";
 import Database from "../db";
 
 const prisma = Database.getInstance().prisma;
@@ -50,21 +51,8 @@ class CartController {
         return;
       }
 
-      const userId = res.locals["userId"];
-      const cart = await prisma.shoppingCart.findFirst({
-        where: { id: cartId, userId },
-      });
-
-      if (!cart) {
-        res.status(404).json({ message: "cart item not found!" });
-        return;
-      }
-
-      await prisma.shoppingCart.delete({
+      await prisma.cartItem.delete({
         where: { id: cartId },
-        include: {
-          cartItems: true,
-        },
       });
 
       res.status(200).json({ message: "cart item removed successfully" });
@@ -103,7 +91,7 @@ class CartController {
       //shopping cart
       if (!user.cartSessionId) {
         const shoppingCart = await prisma.shoppingCart.create({
-          data: { userId },
+          data: { userId, sessionId: uuiv4() },
         });
         if (!shoppingCart) {
           res.status(404).json({ message: "shopping cart not found!" });

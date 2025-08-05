@@ -1,13 +1,12 @@
 import { Router } from "express";
-import * as cartsRoute from "../../controllers/carts";
-import { getUserInfoFromToken } from "../../middleware/getUserInfo";
+import CartController from "../../controllers/carts";
+import { authMiddleware } from "../../middleware/authMiddleware";
 
 const route = Router();
 
 route
-  .post("/add", getUserInfoFromToken, cartsRoute.addProductToCart)
-  .post("/get", getUserInfoFromToken, cartsRoute.fetchUserCart)
-  .post("/checkout", getUserInfoFromToken, cartsRoute.makeOrderFromCart)
-  .delete("/remove", cartsRoute.removeProductFromCart);
+  .get("/", authMiddleware, CartController.fetchCart)
+  .post("/add", authMiddleware, CartController.addToCartProduct)
+  .delete("/remove", authMiddleware, CartController.removeCart);
 
 export default route;

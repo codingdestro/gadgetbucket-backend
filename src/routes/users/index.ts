@@ -1,13 +1,11 @@
 import { Router } from "express";
-import * as userRoutes from "../../controllers/users.ts";
-import userAlreadyExists from "../../middleware/userExists.ts";
-import userValidation from "../../middleware/userValidation.ts";
+import UserController from "../../controllers/users.ts";
 
 const route = Router();
 
 route
-  .post("/signin", userValidation, userAlreadyExists, userRoutes.signin)
-  .post("/login", userRoutes.login)
-  .post("/authenticate", userRoutes.authenticate);
+  .post("/login", UserController.login)
+  .post("/register", UserController.register)
+  .get("/logout", UserController.logout);
 
 export default route;

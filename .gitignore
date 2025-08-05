@@ -7,4 +7,4 @@ node_modules
 drizzle
 *.sqlite
 
-primsa/migrations
+prisma/migrations

@@ -62,7 +62,6 @@ model Product {
   name          String
   description   String?
   price         Decimal
-  offerPrice    Decimal? @map("offer_price")
   isDeleted     Boolean  @default(false) @map("is_deleted")
   stockQuantity Int      @default(100) @map("stock_quantity")
   dateCreated   DateTime @default(now()) @map("date_created")
@@ -79,7 +78,7 @@ model Product {
 model ShoppingCart {
   id          String   @id @default(uuid())
   userId      String
-  sessionId   String?
+  sessionId   String   @unique
   dateCreated DateTime @default(now()) @map("date_created")
   dateUpdated DateTime @updatedAt @map("date_updated")
 
@@ -99,7 +98,7 @@ model CartItem {
   dateAdded   DateTime @default(now()) @map("date_added")
 
   // Relations
-  cart    ShoppingCart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cart    ShoppingCart @relation(fields: [cartId], references: [sessionId])
   product Product      @relation(fields: [productId], references: [id])
 
   @@unique([cartId, productId], name: "unique_cart_product")
