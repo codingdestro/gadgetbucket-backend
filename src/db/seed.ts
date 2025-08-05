@@ -67,6 +67,7 @@ async function seedProducts() {
       image: product.image,
       name: product.title,
       description: "A high-performance gaming PC",
+      category: "Gaming",
     };
 
     await prisma.product.create({
