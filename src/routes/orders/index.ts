@@ -1,18 +1,12 @@
 import { Router } from "express";
-import {
-  fetchOrders,
-  updateStatusOfOrder,
-  makeOrder,
-} from "../../controllers/orders";
-import { fetchUserCart } from "../../controllers/carts";
-("../../controllers/carts.ts");
+import OrderController from "../../controllers/orders";
+import { authMiddleware } from "../../middleware/authMiddleware";
 
 const route = Router();
 
 route
-  .post("/make", makeOrder)
-  .post("/status", updateStatusOfOrder)
-  .post("/get", fetchOrders)
-  .post("/fetch", fetchUserCart);
+  .get("/", authMiddleware, OrderController.fetchOrders)
+  .post("/checkout", authMiddleware, OrderController.checkoutCart)
+  .post("/make", authMiddleware, OrderController.makeOrder);
 
 export default route;
