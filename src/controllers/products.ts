@@ -12,20 +12,19 @@ class ProductsController {
       const products = await prisma.product.findMany({
         skip: (pageNumber - 1) * limitNumber,
         take: limitNumber,
-        where: {isDeleted: false},
+        where: { isDeleted: false },
         orderBy: {
-          createdAt: "desc",
+          dateCreated: "desc",
         },
         select: {
           id: true,
-          title: true,
+          name: true,
           description: true,
-          price: true,
           offerPrice: true,
-          img: true,
-          createdAt: true,
-          updatedAt: true,
-          },
+          price: true,
+          image: true,
+          stockQuantity: true,
+        },
       });
 
       res.status(200).json({

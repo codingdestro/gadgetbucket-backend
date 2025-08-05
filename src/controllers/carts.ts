@@ -1,148 +1,137 @@
 import { Request, Response } from "express";
-import { carts, Users, products, orders } from "../../prisma";
-import { db } from "../db";
-import { eq } from "drizzle-orm";
+import Database from "../db";
 
-//add product to cart
-export const addToCartHandler = async (cartItem: {
-  userId: string;
-  productId: string;
-  cartToken: string;
-}) => {
-  const cart = await db?.insert(carts).values({
-    ...cartItem,
-    pdId: cartItem.productId,
-  });
-  return cart;
-};
+const prisma = Database.getInstance().prisma;
 
-export const makeOrderHandler = async (orderItem: {
-  cartToken: string;
-  payment: string;
-  userId: string;
-  address: string;
-  contact: string;
-}) => {
-  const order = await db?.insert(orders).values({
-    ...orderItem,
-  });
-  return order;
-};
-
-const addProductToCart = async (req: Request, res: Response) => {
-  try {
-    // const { cartToken, userId, productId } = req.body;
-
-    await addToCartHandler({ ...req.body });
-
-    res.json({
-      msg: "successfully added your product to cart",
-    });
-  } catch (error) {
-    console.log(error);
-    res.json({
-      err: "fail to add product into cart",
-    });
-  }
-};
-
-const getProductsFromCart = async (cartToken: string) => {
-  const cart = await db
-    ?.select({ id: carts.id, products })
-    .from(carts)
-    .innerJoin(products, eq(carts.pdId, products.id))
-    .where(eq(carts.cartToken, cartToken));
-
-  let payment = 0;
-  if (!cart) return { cart: null, payment: null };
-  for (let i = 0; i < cart.length; i++) {
-    payment += cart[i].products!.price;
-  }
-  return { cart, payment };
-};
-//fetch all products of user according to current cartToken
-const fetchUserCart = async (req: Request, res: Response) => {
-  try {
-    const { cartToken } = req.body;
-    if (!cartToken) {
-      res.json({
-        err: "empty user id",
+class CartController {
+  static async fetchCart(req: Request, res: Response) {
+    try {
+      const user = await prisma.user.findFirst({
+        where: { id: res.locals["userId"] },
       });
-      return;
-    }
 
-    const { cart, payment } = await getProductsFromCart(cartToken)!;
+      if (!user) {
+        res.status(404).json({ message: "user not found!" });
+        return;
+      }
+      if (!user.cartSessionId) {
+        res.status(404).json({ message: "cart not found!" });
+        return;
+      }
 
-    if (!cart || !payment) {
-      res.json({
-        msg: "not found cart and product",
+      const carts = await prisma.shoppingCart.findMany({
+        where: {
+          sessionId: user.cartSessionId,
+        },
+        include: {
+          cartItems: {
+            include: {
+              product: true,
+            },
+          },
+        },
       });
-      return;
+      res.status(200).json({
+        message: "fetched all cart items",
+        cart: carts,
+      });
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    res.json({
-      msg: "successfully fetched cart",
-      cart: [...cart],
-      payment: payment,
-    });
-  } catch (error) {
-    console.log(error);
-    res.json({
-      err: "failed to fetch carts",
-    });
   }
-};
 
-//remove a single cart item from cart
-const removeProductFromCart = async (req: Request, res: Response) => {
-  try {
-    const { cartId } = req.body;
-    if (!cartId) {
-      res.json({ err: "empty cart id" });
-      return;
+  static async removeCart(req: Request, res: Response) {
+    try {
+      const { cartId } = req.body;
+      if (!cartId) {
+        res.status(403).json({ message: "parameter error" });
+        return;
+      }
+
+      const userId = res.locals["userId"];
+      const cart = await prisma.shoppingCart.findFirst({
+        where: { id: cartId, userId },
+      });
+
+      if (!cart) {
+        res.status(404).json({ message: "cart item not found!" });
+        return;
+      }
+
+      await prisma.shoppingCart.delete({
+        where: { id: cartId },
+        include: {
+          cartItems: true,
+        },
+      });
+
+      res.status(200).json({ message: "cart item removed successfully" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error" });
     }
-    const done = await db?.delete(carts).where(eq(carts.id, cartId));
-    res.json(
-      done
-        ? { msg: "successfully removed item from your cart" }
-        : { msg: "not item to remove" },
-    );
-  } catch (error) {
-    res.json({
-      msg: "faild to remove cart item",
-    });
   }
-};
-const makeOrderFromCart = async (req: Request, res: Response) => {
-  try {
-    const { cartToken, userId } = req.body;
-    if (!cartToken || !userId) {
-      res.json({ msg: "cartId or userId not found!" });
-      return;
+
+  static async addToCartProduct(req: Request, res: Response) {
+    try {
+      const { cartToken, productId, quantity } = req.body;
+      if (!cartToken || !productId || !quantity) {
+        res.status(403).json({ message: "paramerter error" });
+        return;
+      }
+
+      const product = await prisma.product.findFirst({
+        where: { id: productId },
+      });
+      if (!product) {
+        res.status(403).json({ message: "invalid product found!" });
+        return;
+      }
+
+      const user = await prisma.user.findFirst({
+        where: { id: res.locals["userId"] },
+      });
+      if (!user) {
+        res.status(404).json({ message: "user not found!" });
+        return;
+      }
+
+      const userId = res.locals["userId"];
+
+      //shopping cart
+      if (!user.cartSessionId) {
+        const shoppingCart = await prisma.shoppingCart.create({
+          data: { userId },
+        });
+        if (!shoppingCart) {
+          res.status(404).json({ message: "shopping cart not found!" });
+          return;
+        }
+        await prisma.user.update({
+          where: { id: userId },
+          data: { cartSessionId: shoppingCart.sessionId },
+        });
+      }
+      //create a new cart item
+      const cart = await prisma.cartItem.create({
+        data: {
+          productId,
+          priceAtTime: product.price,
+          quantity,
+          cartId: user.cartSessionId!,
+        },
+      });
+
+      res.status(201).json({
+        message: "added to cart",
+        cart,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error" });
     }
-    const { payment } = await getProductsFromCart(cartToken);
-    const done = await makeOrderHandler({ ...req.body, payment });
-
-    await db
-      ?.update(Users)
-      .set({
-        cartToken: "",
-      })
-      .where(eq(Users.id, userId));
-
-    res.json({ msg: "successfully confirm order", done });
-  } catch (error) {
-    res
-      .json({
-        msg: "faild to make order!",
-      })
-      .sendStatus(404);
   }
-};
-
-export {
-  addProductToCart,
-  fetchUserCart,
-  removeProductFromCart,
-  makeOrderFromCart,
-};
+}
+export default CartController;

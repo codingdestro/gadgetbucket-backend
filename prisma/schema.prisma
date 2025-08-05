@@ -1,111 +1,243 @@
+// Prisma Schema for Order Processing System
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "sqlite" // or "postgresql", "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id            String         @id @default(uuid())
-    fullname      String
-    password      String
-    email         String         @unique
-    cartToken     String
-    carts         Cart[]
-    orders        Order[]
-    payments      Payment[]
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
-    productGrades ProductGrade[]
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password")
+  fullname      String   @map("fullname")
+  cartSessionId String?  @map("cart_session_id")
+  dateCreated   DateTime @default(now()) @map("date_created")
+  dateUpdated   DateTime @updatedAt @map("date_updated")
 
-    @@map("users")
+  // Relations
+  addresses      Address[]
+  shoppingCarts  ShoppingCart[]
+  orders         Order[]
+  paymentMethods PaymentMethod[]
+
+  @@map("users")
 }
 
 model Address {
-    id        String   @id @default(uuid())
-    userId    String
-    address   String
-    contact   String
-    city      String
-    state     String
-    zip       String
-    orderId   String?
-    Order     Order?   @relation(fields: [orderId], references: [id])
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String
+  streetAddress String   @map("street_address")
+  city          String
+  state         String
+  postalCode    String   @map("postal_code")
+  dateCreated   DateTime @default(now()) @map("date_created")
 
-    @@map("addresses")
+  // Relations
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingOrders Order[] @relation("ShippingAddress")
+  Order          Order[]
+
+  @@map("addresses")
 }
 
-model Payment {
-    id        String   @id @default(uuid())
-    userId    String
-    orderId   String
-    amount    Int
-    method    String
-    status    String   @default("pending")
-    createdAt DateTime @default(now())
-    user      User     @relation(fields: [userId], references: [id])
-    order     Order    @relation(fields: [orderId], references: [id])
+model Category {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
 
-    @@map("payments")
+  // Relations
+  products Product[]
+
+  @@map("categories")
 }
 
 model Product {
-    id            String         @id @default(uuid())
-    title         String
-    description   String
-    img           String
-    price         Int
-    offerPrice    Int?
-    category      String
-    carts         Cart[]
-    productGrades ProductGrade[]
-    isDeleted     Boolean        @default(false)
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
+  id            String   @id @default(uuid())
+  image         String
+  categoryId    String?
+  name          String
+  description   String?
+  price         Decimal
+  offerPrice    Decimal? @map("offer_price")
+  isDeleted     Boolean  @default(false) @map("is_deleted")
+  stockQuantity Int      @default(100) @map("stock_quantity")
+  dateCreated   DateTime @default(now()) @map("date_created")
+  dateUpdated   DateTime @updatedAt @map("date_updated")
 
-    @@map("products")
+  // Relations
+  category   Category?   @relation(fields: [categoryId], references: [id])
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@map("products")
 }
 
-model Cart {
-    id        String  @id @default(uuid())
-    userId    String
-    productId String
-    cartToken String
-    user      User    @relation(fields: [userId], references: [id])
-    product   Product @relation(fields: [productId], references: [id])
+model ShoppingCart {
+  id          String   @id @default(uuid())
+  userId      String
+  sessionId   String?
+  dateCreated DateTime @default(now()) @map("date_created")
+  dateUpdated DateTime @updatedAt @map("date_updated")
 
-    @@map("carts")
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+
+  @@map("shopping_carts")
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+  cartId      String
+  productId   String
+  quantity    Int      @default(1)
+  priceAtTime Decimal  @map("price")
+  dateAdded   DateTime @default(now()) @map("date_added")
+
+  // Relations
+  cart    ShoppingCart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId], name: "unique_cart_product")
+  @@map("cart_items")
 }
 
 model Order {
-    id        String    @id @default(uuid())
-    createdAt String    @default("")
-    status    String?   @default("pending")
-    userId    String
-    cartToken String
-    contact   String
-    paymentId String?
-    Payments  Payment[]
-    addresses Address[]
-    user      User      @relation(fields: [userId], references: [id])
+  id          String      @id @default(uuid())
+  userId      String
+  orderNumber String      @unique @map("order_number")
+  orderStatus OrderStatus @default(pending) @map("order_status")
 
-    @@map("orders")
+  // Pricing
+  totalAmount Decimal @map("total_amount")
+
+  // Addresses
+  shippingAddressId       String? @map("shipping_address_id")
+  billingAddressSnapshot  Json?   @map("billing_address_snapshot")
+  shippingAddressSnapshot Json?   @map("shipping_address_snapshot")
+
+  // Dates
+  orderDate     DateTime  @default(now()) @map("order_date")
+  shippedDate   DateTime? @map("shipped_date")
+  deliveredDate DateTime? @map("delivered_date")
+
+  // Additional info
+  notes String?
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  shippingAddress Address?    @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  orderItems      OrderItem[]
+  payments        Payment[]
+  addressId       String?
+  Address         Address?    @relation(fields: [addressId], references: [id])
+
+  @@map("orders")
 }
 
-model ProductGrade {
-    id        String   @id @default(uuid())
-    productId String
-    userId    String
-    rating    Int      @default(1) // 1-5 star rating
-    review    String?
-    createdAt DateTime @default(now())
-    product   Product  @relation(fields: [productId], references: [id])
-    user      User     @relation(fields: [userId], references: [id])
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String  @map("order_id")
+  productId   String  @map("product_id")
+  productName String  @map("product_name")
+  quantity    Int
+  unitPrice   Decimal @map("unit_price")
+  totalPrice  Decimal @map("total_price")
 
-    @@unique([productId, userId]) // One review per user per product
-    @@map("product_grades")
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model PaymentMethod {
+  id             String            @id @default(uuid())
+  userId         String            @map("user_id")
+  methodType     PaymentMethodType @map("method_type")
+  provider       String?
+  lastFourDigits String?           @map("last_four_digits")
+  expiryMonth    Int?              @map("expiry_month")
+  expiryYear     Int?              @map("expiry_year")
+  cardholderName String?           @map("cardholder_name")
+  isDefault      Boolean           @default(false) @map("is_default")
+  isActive       Boolean           @default(true) @map("is_active")
+  dateCreated    DateTime          @default(now()) @map("date_created")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@map("payment_methods")
+}
+
+model Payment {
+  id                String            @id @default(uuid())
+  orderId           String            @map("order_id")
+  paymentMethodId   String?           @map("payment_method_id")
+  transactionId     String?           @unique @map("transaction_id")
+  paymentStatus     PaymentStatus     @default(pending) @map("payment_status")
+  paymentMethodType PaymentMethodType @map("payment_method_type")
+  amount            Decimal
+  currency          String            @default("USD")
+  paymentDate       DateTime          @default(now()) @map("payment_date")
+  refundAmount      Decimal           @default(0) @map("refund_amount")
+  refundDate        DateTime?         @map("refund_date")
+  processorResponse Json?             @map("processor_response")
+  notes             String?
+
+  // Relations
+  order         Order          @relation(fields: [orderId], references: [id])
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+
+  @@map("payments")
+}
+
+model ShippingMethod {
+  id            String  @id @default(uuid())
+  name          String
+  description   String?
+  cost          Decimal
+  estimatedDays Int?    @map("estimated_days")
+  isActive      Boolean @default(true) @map("is_active")
+
+  @@map("shipping_methods")
+}
+
+// Enums
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  shipped
+  delivered
+  cancelled
+  returned
+
+  @@map("order_status")
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+  refunded
+  partially_refunded
+
+  @@map("payment_status")
+}
+
+enum PaymentMethodType {
+  credit_card
+  debit_card
+  paypal
+  bank_transfer
+  digital_wallet
+  COD
+
+  @@map("payment_method_type")
 }

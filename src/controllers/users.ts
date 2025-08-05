@@ -1,7 +1,6 @@
 import { createToken } from "../service/token";
 import { Request, Response } from "express";
 import { encryptPassword, validatePassword } from "../utils/hashPassword";
-import { v4 as uuidv4 } from "uuid";
 import Database from "../db";
 
 const prisma = Database.getInstance().prisma;
@@ -25,8 +24,7 @@ class UserController {
       data: {
         fullname,
         email,
-        password: hashedPassword,
-        cartToken: uuidv4(), // Use existing cart token or set to null
+        passwordHash: hashedPassword,
       },
     });
     if (!newUser) {
@@ -53,7 +51,7 @@ class UserController {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const isValidPassword = await validatePassword(password, user.password);
+    const isValidPassword = await validatePassword(password, user.passwordHash);
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid password" });
     }
