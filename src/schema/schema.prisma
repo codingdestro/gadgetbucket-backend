@@ -1,0 +1,111 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id            String         @id @default(uuid())
+    fullname      String
+    password      String
+    email         String         @unique
+    cartToken     String
+    carts         Cart[]
+    orders        Order[]
+    payments      Payment[]
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    productGrades ProductGrade[]
+
+    @@map("users")
+}
+
+model Address {
+    id        String   @id @default(uuid())
+    userId    String
+    address   String
+    contact   String
+    city      String
+    state     String
+    zip       String
+    orderId   String?
+    Order     Order?   @relation(fields: [orderId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("addresses")
+}
+
+model Payment {
+    id        String   @id @default(uuid())
+    userId    String
+    orderId   String
+    amount    Int
+    method    String
+    status    String   @default("pending")
+    createdAt DateTime @default(now())
+    user      User     @relation(fields: [userId], references: [id])
+    order     Order    @relation(fields: [orderId], references: [id])
+
+    @@map("payments")
+}
+
+model Product {
+    id            String         @id @default(uuid())
+    title         String
+    description   String
+    img           String
+    price         Int
+    offerPrice    Int?
+    category      String
+    carts         Cart[]
+    productGrades ProductGrade[]
+    isDeleted     Boolean        @default(false)
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+
+    @@map("products")
+}
+
+model Cart {
+    id        String  @id @default(uuid())
+    userId    String
+    productId String
+    cartToken String
+    user      User    @relation(fields: [userId], references: [id])
+    product   Product @relation(fields: [productId], references: [id])
+
+    @@map("carts")
+}
+
+model Order {
+    id        String    @id @default(uuid())
+    createdAt String    @default("")
+    status    String?   @default("pending")
+    userId    String
+    cartToken String
+    contact   String
+    paymentId String?
+    Payments  Payment[]
+    addresses Address[]
+    user      User      @relation(fields: [userId], references: [id])
+
+    @@map("orders")
+}
+
+model ProductGrade {
+    id        String   @id @default(uuid())
+    productId String
+    userId    String
+    rating    Int      @default(1) // 1-5 star rating
+    review    String?
+    createdAt DateTime @default(now())
+    product   Product  @relation(fields: [productId], references: [id])
+    user      User     @relation(fields: [userId], references: [id])
+
+    @@unique([productId, userId]) // One review per user per product
+    @@map("product_grades")
+}

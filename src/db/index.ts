@@ -1,21 +1,24 @@
-import { exit } from "process";
-import { drizzle } from "drizzle-orm/bun-sqlite";
-import { Database } from "bun:sqlite";
-import conf from "../__config__";
+class Database {
+  private static instance: Database;
 
-import * as schema from "../schema/index.ts";
+  private constructor() {
+    // Initialize database connection here
+  }
 
-const client = new Database(conf.get("db_url"));
+  public static getInstance(): Database {
+    if (!Database.instance) {
+      Database.instance = new Database();
+    }
+    return Database.instance;
+  }
 
-async function initDb() {
-  try {
-    console.log("trying to connect with database ...");
-    const db = await drizzle(client, { schema });
-    console.log("connected to database");
-    return db;
-  } catch (error) {
-    console.log(error);
-    exit(1);
+  public connect() {
+    // Logic to connect to the database
+  }
+
+  public disconnect() {
+    // Logic to disconnect from the database
   }
 }
-export const db = await initDb();
+
+export default Database;
