@@ -56,15 +56,22 @@ async function parseCSV() {
 async function seedProducts() {
   const products = await parseCSV();
   products.map(async (product) => {
+    if (!product.image || !product.title || !product.price) {
+      console.error("Invalid product data:", product);
+      return;
+    }
+
+    const data = {
+      price: parseFloat(product.price.split("₹")[0]),
+      offerPrice: parseFloat(product.price.split("₹")[0]) * 0.9, // Assuming a 10% discount
+      img: product.image,
+      title: product.title,
+      description: "A high-performance gaming PC",
+      category: "Gaming PC",
+    };
+
     await prisma.product.create({
-      data: {
-        price: parseFloat(product.price),
-        offerPrice: parseFloat(product.price) * 0.9, // Assuming a 10% discount
-        img: product.image,
-        title: product.title,
-        description: "A high-performance gaming PC",
-        category: "Gaming PC",
-      },
+      data,
     });
   });
   console.log("Products seeded successfully");

@@ -1,11 +1,10 @@
 import { Router } from "express";
-import * as productRoutes from "../../controllers/products.ts";
+import ProductsController from "../../controllers/products";
 
 const productRouter = Router();
 productRouter
-  .post("/get", productRoutes.fetchAllProducts)
-  .post("/get/product", productRoutes.fetchProduct)
-  .post("/get/products", productRoutes.fetchProductWithOffset)
-  .post("/add", productRoutes.addProduct);
+  .get("/:id", ProductsController.fetchProductById)
+  .get("/:page/:limit", ProductsController.fetchProducts)
+  .get("/", ProductsController.fetchProducts);
 
 export default productRouter;
