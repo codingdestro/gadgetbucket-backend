@@ -5,6 +5,6 @@ const productRouter = Router();
 productRouter
   .get("/:id", ProductsController.fetchProductById)
   .get("/:page/:limit", ProductsController.fetchProducts)
-  .get("/", ProductsController.fetchProducts);
+  .get("/", ProductsController.fetchProducts)
 
 export default productRouter;

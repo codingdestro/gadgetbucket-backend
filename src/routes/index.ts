@@ -7,7 +7,7 @@ import orderRoute from "./orders";
 const route = Router();
 route
   .use("/products", productsRoute)
-  .use("/account", usersRoute)
+  .use("/auth", usersRoute)
   .use("/carts", cartsRoute)
   .use("/orders", orderRoute);
 

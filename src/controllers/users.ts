@@ -6,9 +6,9 @@ import Database from "../db";
 const prisma = Database.getInstance().prisma;
 class UserController {
   static async register(req: Request, res: Response) {
-    const { fullname, email, password } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!fullname || !email || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -22,7 +22,7 @@ class UserController {
     const hashedPassword = await encryptPassword(password);
     const newUser = await prisma.user.create({
       data: {
-        fullname,
+        fullname: name,
         email,
         passwordHash: hashedPassword,
       },
@@ -48,7 +48,7 @@ class UserController {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(401).json({ error: "User not found" });
     }
 
     const isValidPassword = await validatePassword(password, user.passwordHash);
@@ -73,6 +73,19 @@ class UserController {
         status: "success",
         message: "User logged out successfully",
       });
+  }
+
+  static async auth(req: Request, res: Response) {
+    try {
+      const token = await createToken(res.locals['userId']!);
+      res.status(200).json({ token })
+    } catch (error) {
+      console.log(error)
+      res.status(500)
+        .json({ error: "Internal server error!" })
+
+    }
+
   }
 }
 
