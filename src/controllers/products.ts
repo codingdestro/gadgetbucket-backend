@@ -40,15 +40,15 @@ class ProductsController {
 
   static async fetchProductById(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const { id } = req.query;
       if (!id) {
         return res.status(400).json({
           message: "Product ID is required",
         });
       }
 
-      const product = await prisma.product.findUnique({
-        where: { id },
+      const product = await prisma.product.findFirst({
+        where: { id:id as string },
       });
 
       if (!product) {

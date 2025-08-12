@@ -20,7 +20,7 @@ class CartController {
         return;
       }
 
-      const carts = await prisma.shoppingCart.findMany({
+      const cart = await prisma.shoppingCart.findUnique({
         where: {
           sessionId: user.cartSessionId,
         },
@@ -32,9 +32,18 @@ class CartController {
           },
         },
       });
+      if (!cart) {
+        res.status(404).json({ message: "cart not found!" });
+        return;
+      }
+
       res.status(200).json({
         message: "fetched all cart items",
-        cart: carts,
+        cart: cart.cartItems.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          product: item.product,
+        })),
       });
     } catch (error) {
       console.log(error);
@@ -64,8 +73,8 @@ class CartController {
 
   static async addToCartProduct(req: Request, res: Response) {
     try {
-      const { cartToken, productId, quantity } = req.body;
-      if (!cartToken || !productId || !quantity) {
+      const { productId, quantity } = req.body;
+      if (!productId || !quantity) {
         res.status(403).json({ message: "paramerter error" });
         return;
       }

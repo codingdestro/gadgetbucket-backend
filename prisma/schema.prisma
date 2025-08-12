@@ -82,7 +82,6 @@ model CartItem {
   cart    ShoppingCart @relation(fields: [cartId], references: [sessionId])
   product Product      @relation(fields: [productId], references: [id])
 
-  @@unique([cartId, productId], name: "unique_cart_product")
   @@map("cart_items")
 }
 
